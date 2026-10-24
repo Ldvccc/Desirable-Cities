@@ -1,4 +1,8 @@
-__pycache__/
-*.pyc
-.venv/
-venv/
+# Secrets
+.env
+
+# Données (trop lourdes, régénérées par le code)
+data/raw/
+data/processed/
+*.parquet
+*.sqlite
