@@ -9,6 +9,7 @@ Supervisor: Fabien Pfaender (UTSEUS / UTC–COSTECH). Industry partner: John Vil
 
 - `src/`: Python code
 - `data/`: corpus (not versioned)
+- `schema/`: annotation schema (JSON Schema), lexicon of keywords per category, annotated examples
 - `docs/`: project charter, reading notes, draft vocabulary
 - `tests/`: unit tests
 
