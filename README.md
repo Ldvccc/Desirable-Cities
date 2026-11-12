@@ -17,3 +17,15 @@ Supervisor: Fabien Pfaender (UTSEUS / UTC–COSTECH). Industry partner: John Vil
 
     pip install -r requirements.txt
     cp .env.example .env   # then fill in your API keys
+
+## Pipeline
+
+Run from the project root, in this order:
+
+    python src/wikidata_communes.py   # list of communes from Wikidata
+    python src/make_sample.py         # stratified sample of 500 communes
+    python src/wikipedia_titles.py    # article titles (fr, en)
+    python src/wikipedia_text.py      # article text -> data/processed/corpus_500.parquet
+    python src/split_sentences.py     # sentences    -> data/processed/sentences_500.parquet
+
+Tests: `python -m pytest -q tests`
