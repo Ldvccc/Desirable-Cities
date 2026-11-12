@@ -13,7 +13,7 @@
       "description": "<insee>-<langue>-<revision_id>-s<index>, index = position of the sentence in the article (0-based).",
       "pattern": "^[0-9AB]{5}-[a-z]{2,3}-[0-9]+-s[0-9]+$"
     },
-    "insee": {"type": "string", "pattern": "^[0-9]{2}[0-9AB][0-9]{2}$", "description": "INSEE code, always text (2A/2B for Corsica)."},
+    "insee": {"type": "string", "pattern": "^(?:[0-9]{2}|2[AB])[0-9]{3}$", "description": "INSEE code, always text (2A/2B for Corsica)."},
     "langue": {"type": "string", "pattern": "^[a-z]{2,3}$", "description": "Wikipedia language edition (fr, en, de, ...)."},
     "revision_id": {"type": "integer", "description": "Wikipedia revision annotated (reproducibility)."},
     "section_type": {

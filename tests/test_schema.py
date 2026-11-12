@@ -128,3 +128,11 @@ def test_unknown_tag_is_rejected(examples, lexicon):
     rec["environments"][0]["tags"] = ["natural.water_features.ocean_liner"]
     errs = su.check_consistency(rec, su.valid_tags(lexicon))
     assert any("unknown tag" in e for e in errs)
+
+
+@pytest.mark.parametrize("insee, ok", [("01049", True), ("2A004", True), ("2B033", True), ("97411", True),
+                                       ("2C004", False), ("1049", False), ("A2004", False)])
+def test_insee_pattern_accepts_corsica(examples, schema, lexicon, insee, ok):
+    rec = copy.deepcopy(examples[0])
+    rec["insee"] = insee
+    assert (su.validate_records([rec], schema, lexicon) == {}) is ok
