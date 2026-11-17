@@ -1,0 +1,6 @@
+requests
+pandas
+pyarrow
+pytest
+pyyaml
+jsonschema>=4.18

@@ -1,0 +1,445 @@
+# Desirable Cities lexicon, version 0.1.0 (2026-11-01)
+#
+# Keywords that justify assigning a sentence to a category of the Desirable
+# Cities framework (Villar 2025). Used by the keyword classifier (algorithm A)
+# and as definitions in the LLM prompts (algorithm B).
+#
+# Page numbers = PRINTED page numbers of the thesis (PDF page = printed + 19).
+#
+# status:
+#   thesis    = list taken from the thesis (English term verbatim); the French
+#               terms are our translation and must be validated.
+#   extension = proposed by us to cover Wikipedia content the thesis lists do
+#               not cover; to be validated with John Villar.
+#   proposal  = experimental, no list exists in the thesis (reflections).
+#
+# Matching rules (v0): terms are lower-case lemmas; multi-word terms match as
+# phrases; the classifier lemmatises the sentence before matching.
+
+version: 0.1.0
+date: "2026-11-01"
+sources:
+  terms_naire_tray: "Terms-naire Tray, §22.5.7, p. 380 (Image 156, p. 381): natural, cultural, built, emotions, actions; ideas deliberately omitted"
+  koinos_tags: "Koinos full tagging system, §31.2.3.7, pp. 533-537 (same structure as the Terms-naire Tray)"
+  ch15: "Constructural environment framework, ch. 15, pp. 253-265"
+  emotionnaire: "Emotion-naire Cards, §22.5.5, p. 367 (four card categories)"
+  subject: "EG01 subject proposal, section 1 (natural / cultural / constructural boxes)"
+  thesis_text: "Thesis body text (page given in ref)"
+  proposal: "Our proposal, no list in the thesis"
+
+environments:
+
+  natural:
+    label: Natural environment
+    definition: "Ecological and atmospheric elements: weather, time of day, temperature, natural sounds, water and green features (Koinos 1, p. 534); rivers, relief, climate, parks and gardens, ecosystems, green and blue space (subject)."
+    subcategories:
+      - id: season
+        source: koinos_tags
+        ref: "1.1, p. 534"
+        status: thesis
+        terms:
+          - {en: winter, fr: [hiver, hivernal]}
+          - {en: spring, fr: [printemps, printanier]}
+          - {en: summer, fr: [été, estival]}
+          - {en: autumn, fr: [automne, automnal]}
+          - {en: raining, fr: [saison des pluies, pluvieux]}
+          - {en: dry, fr: [sec, sécheresse, aride]}
+      - id: weather
+        source: koinos_tags
+        ref: "1.2, p. 534"
+        status: thesis
+        terms:
+          - {en: sunny, fr: [ensoleillé, ensoleillement, soleil]}
+          - {en: cloudy, fr: [nuageux, nébulosité]}
+          - {en: windy, fr: [venteux, vent, mistral, tramontane]}
+          - {en: rainy, fr: [pluie, pluvieux, précipitation]}
+          - {en: stormy, fr: [orage, orageux, tempête]}
+          - {en: rainbow, fr: [arc-en-ciel]}
+          - {en: snow, fr: [neige, enneigé, enneigement]}
+          - {en: mist, fr: [brume, brumeux]}
+          - {en: fog, fr: [brouillard]}
+          - {en: moon, fr: [lune, clair de lune]}
+          - {en: stars-full, fr: [étoile, ciel étoilé]}
+      - id: time
+        source: koinos_tags
+        ref: "1.3, p. 534"
+        status: thesis
+        note: "Rare in encyclopaedic text; kept for Koinos compatibility."
+        terms:
+          - {en: early morning, fr: [petit matin, aube]}
+          - {en: morning, fr: [matin, matinée]}
+          - {en: noon, fr: [midi]}
+          - {en: afternoon, fr: [après-midi]}
+          - {en: evening, fr: [soir, soirée]}
+          - {en: late evening, fr: [nuit, nocturne]}
+          - {en: dawn, fr: [aurore, lever du soleil, coucher du soleil, crépuscule]}
+      - id: temperature
+        source: koinos_tags
+        ref: "1.4, p. 534 (values -10 °C to 45 °C)"
+        status: thesis
+        note: "Koinos records degrees; in text we match temperature and climate words."
+        terms:
+          - {en: temperature, fr: [température, degré]}
+          - {en: hot, fr: [chaud, chaleur, canicule]}
+          - {en: cold, fr: [froid, gel, gelée]}
+          - {en: mild, fr: [doux, douceur, tempéré]}
+      - id: natural_sounds
+        source: koinos_tags
+        ref: "1.5, p. 534"
+        status: thesis
+        terms:
+          - {en: sea waves, fr: [vague, ressac]}
+          - {en: river, fr: [murmure de la rivière]}
+          - {en: falls, fr: [bruit de la cascade]}
+          - {en: birds, fr: [oiseau, chant des oiseaux]}
+          - {en: dogs, fr: [chien]}
+          - {en: cats, fr: [chat]}
+          - {en: wind, fr: [souffle du vent]}
+          - {en: breeze, fr: [brise]}
+      - id: water_features
+        source: koinos_tags
+        ref: "1.6, p. 534"
+        status: thesis
+        terms:
+          - {en: sea, fr: [mer, océan, littoral, côte, plage, baie, golfe]}
+          - {en: river, fr: [fleuve, rivière, ruisseau, cours d'eau, affluent, confluent]}
+          - {en: fall, fr: [cascade, chute d'eau]}
+          - {en: lake, fr: [lac, étang, marais, lagune]}
+      - id: green_features
+        source: koinos_tags
+        ref: "1.7, p. 534"
+        status: thesis
+        terms:
+          - {en: volcano, fr: [volcan, volcanique]}
+          - {en: mountain, fr: [montagne, massif, sommet, pic, col]}
+          - {en: hill, fr: [colline, coteau, butte, mont]}
+          - {en: forest, fr: [forêt, bois, boisé]}
+          - {en: trees, fr: [arbre, platane, chêne, alignement d'arbres]}
+          - {en: bushes, fr: [buisson, haie, arbuste]}
+          - {en: grass, fr: [herbe, pelouse, prairie, prés]}
+          - {en: flowers, fr: [fleur, fleuri, floraison]}
+          - {en: blossoming, fr: [éclosion, cerisier en fleurs]}
+          - {en: island, fr: [île, îlot, presqu'île]}
+      - id: relief_climate_ecosystems
+        source: subject
+        ref: "subject, natural environment box"
+        status: extension
+        note: "Wikipedia geography sections describe relief, geology, climate and protected areas, which the Koinos tags do not list."
+        terms:
+          - {en: relief, fr: [relief, altitude, plateau, vallée, plaine, falaise, gorge]}
+          - {en: climate, fr: [climat, climatique, océanique, méditerranéen, continental]}
+          - {en: geology, fr: [géologie, calcaire, granit, sol]}
+          - {en: ecosystem, fr: [écosystème, biodiversité, faune, flore, espèce]}
+          - {en: protected area, fr: [parc naturel, réserve naturelle, natura 2000, site protégé, znieff]}
+          - {en: green and blue space, fr: [trame verte, trame bleue, espace naturel, coulée verte]}
+
+  cultural:
+    label: Cultural environment
+    definition: "Intangible, human-centred elements that shape a place's identity (Koinos 2, p. 534); heritage, history, festivals, gastronomy, identity, imaginaries vs branded spectacles, social behaviours and urban performances (subject)."
+    subcategories:
+      - id: crowd_density
+        source: koinos_tags
+        ref: "2.1, p. 534"
+        status: thesis
+        terms:
+          - {en: nobody, fr: [désert, déserté, vide]}
+          - {en: few people, fr: [peu fréquenté, tranquille]}
+          - {en: many people, fr: [fréquenté, affluence, fréquentation, visiteurs]}
+          - {en: crowded, fr: [foule, bondé, surpeuplé, noir de monde]}
+      - id: atmosphere
+        source: koinos_tags
+        ref: "2.2, p. 534"
+        status: thesis
+        terms:
+          - {en: relax, fr: [détente, détendu, repos]}
+          - {en: peaceful, fr: [paisible, calme, quiétude]}
+          - {en: mistic, fr: [mystique, mystérieux]}
+          - {en: sacred, fr: [sacré, religieux, spirituel, pèlerinage]}
+          - {en: cultural, fr: [culturel, culture]}
+          - {en: educational, fr: [éducatif, pédagogique]}
+          - {en: artistic, fr: [artistique, artiste, art]}
+          - {en: festive, fr: [festif, fête, convivial, animé]}
+          - {en: sportive, fr: [sportif, sport]}
+          - {en: urban, fr: [urbain, citadin]}
+          - {en: safe, fr: [sûr, sécurité, sécurisé]}
+          - {en: clean, fr: [propre, propreté]}
+      - id: cultural_sounds
+        source: koinos_tags
+        ref: "2.3, p. 534"
+        status: thesis
+        terms:
+          - {en: quiet, fr: [silencieux, silence, calme]}
+          - {en: people, fr: [brouhaha, animation]}
+          - {en: cars, fr: [bruit de la circulation, trafic]}
+          - {en: trains, fr: [bruit des trains]}
+          - {en: planes, fr: [bruit des avions, nuisances sonores]}
+          - {en: music, fr: [musique, musical, concert]}
+          - {en: busy, fr: [bruyant, animé, effervescent]}
+      - id: smells
+        source: koinos_tags
+        ref: "2.4, p. 535"
+        status: thesis
+        terms:
+          - {en: restaurants, fr: [odeur de cuisine]}
+          - {en: bakeries, fr: [boulangerie, odeur de pain]}
+          - {en: bars, fr: [bar, café]}
+          - {en: food markets, fr: [marché alimentaire, primeur]}
+      - id: heritage_history
+        source: subject
+        ref: "subject, cultural environment box"
+        status: extension
+        note: "Wikipedia articles are dominated by history and heritage sections; the Koinos tags only cover ambience. Physical buildings stay constructural; their heritage status and history are cultural (see coding rule in the schema note)."
+        terms:
+          - {en: heritage, fr: [patrimoine, patrimonial, monument historique, classé, inscrit, unesco]}
+          - {en: history, fr: [histoire, historique, fondé, fondation, siècle, époque, médiéval, antiquité, révolution]}
+          - {en: archaeology, fr: [archéologie, archéologique, vestige, gallo-romain]}
+      - id: events_festivals
+        source: subject
+        ref: "subject, cultural environment box"
+        status: extension
+        terms:
+          - {en: festival, fr: [festival, fête, carnaval, foire, fête de la musique, feux d'artifice]}
+          - {en: tradition, fr: [tradition, traditionnel, coutume, folklore]}
+      - id: gastronomy
+        source: subject
+        ref: "subject, cultural environment box"
+        status: extension
+        terms:
+          - {en: gastronomy, fr: [gastronomie, gastronomique, spécialité, cuisine, recette]}
+          - {en: local products, fr: [vin, vignoble, fromage, aoc, aop, terroir]}
+      - id: identity_community
+        source: subject
+        ref: "subject, cultural environment box"
+        status: extension
+        terms:
+          - {en: identity, fr: [identité, gentilé, habitants, blason, devise, surnom, jumelage]}
+          - {en: language, fr: [langue régionale, occitan, breton, alsacien, basque, patois]}
+          - {en: community life, fr: [association, vie associative, club, communauté]}
+          - {en: social behaviours, fr: [rassemblement, rencontre, sociabilité]}
+
+  constructural:
+    label: Constructural environment
+    definition: "The human-made core of cityscapes: architectural forms, public spaces, transportation modes and infrastructural networks (Koinos 3, p. 535); morphology, the nine open-air public-space types, transport, building functions, Lynch's paths, edges, nodes, landmarks (ch. 15; subject)."
+    subcategories:
+      - id: open_air_public_spaces
+        source: koinos_tags
+        ref: "3.1, p. 535 (18 types); see facets.public_space_types for the 9 types of ch. 15"
+        status: thesis
+        terms:
+          - {en: square/plaza, fr: [place, esplanade, parvis]}
+          - {en: park, fr: [parc, parc urbain]}
+          - {en: garden, fr: [jardin, square, jardin public]}
+          - {en: promenade, fr: [promenade, quai, berges, front de mer, corniche]}
+          - {en: marina, fr: [port de plaisance, marina]}
+          - {en: avenue, fr: [avenue, boulevard, cours]}
+          - {en: street, fr: [rue]}
+          - {en: lane, fr: [ruelle, venelle, passage, traboule, impasse]}
+          - {en: pedestrian bridge, fr: [passerelle]}
+          - {en: pedestrian boulevard, fr: [rue piétonne, zone piétonne, mail]}
+          - {en: terrace, fr: [terrasse]}
+          - {en: pond, fr: [bassin, plan d'eau]}
+          - {en: swimming pool, fr: [piscine]}
+          - {en: sport features, fr: [stade, terrain de sport, gymnase, complexe sportif]}
+          - {en: entertainment-fair, fr: [fête foraine]}
+          - {en: amusement park, fr: [parc d'attractions, parc de loisirs]}
+          - {en: street market, fr: [marché, marché de plein air, brocante]}
+      - id: visual_references
+        source: koinos_tags
+        ref: "3.2, p. 535"
+        status: thesis
+        terms:
+          - {en: landmark, fr: [monument, emblématique, tour, clocher, beffroi, cathédrale, château, basilique]}
+          - {en: skyline, fr: [silhouette, panorama, gratte-ciel, ligne d'horizon]}
+          - {en: intersection, fr: [carrefour, croisement, intersection]}
+      - id: transportation_systems
+        source: koinos_tags
+        ref: "3.3, p. 535 (19 modes); ch. 15 p. 263 lists 13"
+        status: thesis
+        terms:
+          - {en: metro/subway, fr: [métro]}
+          - {en: elevated metro, fr: [métro aérien, viaduc du métro]}
+          - {en: bus, fr: [bus, autobus, ligne de bus]}
+          - {en: tourist bus, fr: [bus touristique, petit train touristique]}
+          - {en: monorail, fr: [monorail]}
+          - {en: cable car, fr: [téléphérique, télécabine, téléski]}
+          - {en: funicular, fr: [funiculaire, crémaillère]}
+          - {en: tram, fr: [tramway, tram]}
+          - {en: ferry, fr: [ferry, bac, traversier]}
+          - {en: river-boat, fr: [bateau-mouche, navette fluviale, péniche]}
+          - {en: taxi, fr: [taxi, vtc]}
+          - {en: private car, fr: [voiture, automobile]}
+          - {en: motorbike, fr: [moto, deux-roues]}
+          - {en: scooter, fr: [scooter, trottinette]}
+          - {en: bike, fr: [vélo, bicyclette]}
+          - {en: sharing bike, fr: [vélo en libre-service, vélib, vélo'v, vélopartage]}
+          - {en: skate, fr: [skate, planche à roulettes]}
+          - {en: train, fr: [gare, train, ter, tgv, ligne ferroviaire]}
+          - {en: airport, fr: [aéroport, aérodrome]}
+      - id: infrastructure
+        source: koinos_tags
+        ref: "3.4, p. 535"
+        status: thesis
+        terms:
+          - {en: tunnel, fr: [tunnel]}
+          - {en: trains-rails, fr: [voie ferrée, chemin de fer, rail]}
+          - {en: highways, fr: [autoroute, route nationale, rocade, périphérique, route départementale]}
+          - {en: bridge, fr: [pont, viaduc]}
+          - {en: roundabout, fr: [rond-point, giratoire]}
+          - {en: bus lanes, fr: [voie de bus, couloir de bus]}
+          - {en: bike lanes, fr: [piste cyclable, voie verte, véloroute]}
+          - {en: skate parks, fr: [skatepark]}
+          - {en: pedestrian under-pass, fr: [passage souterrain]}
+          - {en: parking lots, fr: [parking, stationnement]}
+          - {en: flood control, fr: [digue, barrage, écluse, canal]}
+          - {en: electric grid, fr: [réseau électrique, centrale]}
+      - id: orientation_elements
+        source: emotionnaire
+        ref: "Emotion-naire card category 2, p. 367 (after Lynch)"
+        status: thesis
+        terms:
+          - {en: paths, fr: [axe, artère, route, chemin, itinéraire]}
+          - {en: edges, fr: [rempart, enceinte, fortification, limite]}
+          - {en: nodes, fr: [pôle d'échanges, nœud, centre-ville]}
+          - {en: landmarks, fr: [repère, point de repère, symbole architectural]}
+      - id: building_functions
+        source: emotionnaire
+        ref: "Emotion-naire card category 4 (functional typologies), p. 367: hotel, restaurants, shops"
+        status: thesis
+        note: "Civic, religious and cultural buildings are an extension: they dominate Wikipedia heritage sections."
+        terms:
+          - {en: hotel, fr: [hôtel, hébergement, camping]}
+          - {en: restaurants, fr: [restaurant, brasserie, bouchon]}
+          - {en: shops, fr: [commerce, boutique, magasin, centre commercial, halle, halles]}
+          - {en: civic buildings, fr: [mairie, hôtel de ville, préfecture, palais de justice], status: extension}
+          - {en: religious buildings, fr: [église, chapelle, abbaye, couvent, temple, mosquée, synagogue], status: extension}
+          - {en: cultural buildings, fr: [musée, théâtre, opéra, cinéma, bibliothèque, médiathèque], status: extension}
+          - {en: education and health, fr: [école, collège, lycée, université, hôpital], status: extension}
+          - {en: housing and morphology, fr: [logement, immeuble, quartier, lotissement, habitat, bâti, architecture], status: extension}
+
+responses:
+
+  emotion:
+    label: Emotions triggered
+    definition: "Immediate affective states: how a setting's look, sound and social climate resonate with individuals (Koinos 4, p. 536)."
+    subcategories:
+      - id: koinos_emotions
+        source: koinos_tags
+        ref: "4, p. 536 (7 emotions, all positive)"
+        status: thesis
+        terms:
+          - {en: calm, fr: [calme, apaisant, sérénité, serein, tranquillité]}
+          - {en: comfort, fr: [confort, confortable, agréable, bien-être]}
+          - {en: happy, fr: [heureux, joie, bonheur, plaisir, gaieté]}
+          - {en: excited, fr: [enthousiasme, excitation, effervescence, vibrant]}
+          - {en: inspired, fr: [inspirant, inspiration, émerveillement, fasciné]}
+          - {en: surprised, fr: [surprenant, surprise, étonnant, insolite]}
+          - {en: nostalgia, fr: [nostalgie, nostalgique]}
+      - id: negative_emotions
+        source: thesis_text
+        ref: "ch. 14 conclusion pp. 251-252 (stress, disconnection); Ellard in §19.2.4, pp. 298-299 (bored and unhappy)"
+        status: extension
+        note: "The Koinos list is only positive (the thesis notes an over-positivity bias of the cards, p. 409). Wikipedia sentences can report negative feelings."
+        terms:
+          - {en: boredom, fr: [ennui, ennuyeux, monotone]}
+          - {en: stress, fr: [stress, stressant, oppressant, anxiété]}
+          - {en: fear, fr: [peur, insécurité, inquiétude]}
+          - {en: sadness, fr: [tristesse, triste, désolation, mélancolie]}
+          - {en: disconnection, fr: [isolement, abandon, délaissé]}
+
+  action:
+    label: Actions triggered
+    definition: "Behaviours a place provokes or enables, such as strolling, exercising or socialising (Koinos 5, p. 537; ch. 15.6, p. 265)."
+    subcategories:
+      - id: koinos_actions
+        source: koinos_tags
+        ref: "5, p. 537 (20 actions); ch. 15.6 p. 265 lists the same minus jogging"
+        status: thesis
+        terms:
+          - {en: working out, fr: [faire du sport, s'entraîner, fitness, musculation]}
+          - {en: jogging, fr: [jogging, footing]}
+          - {en: running, fr: [courir, course à pied]}
+          - {en: sitting, fr: [s'asseoir, banc, assis]}
+          - {en: laying down, fr: [s'allonger, bronzer, se prélasser]}
+          - {en: taking pictures, fr: [photographier, photo, photographie]}
+          - {en: taking selfies, fr: [selfie]}
+          - {en: eating, fr: [manger, déguster, pique-nique, pique-niquer]}
+          - {en: drinking, fr: [boire, prendre un verre, apéritif]}
+          - {en: shopping, fr: [faire les courses, faire du shopping, lèche-vitrine]}
+          - {en: biking, fr: [faire du vélo, pédaler, cyclisme, cyclotourisme]}
+          - {en: skating, fr: [patiner, patinage, roller]}
+          - {en: driving, fr: [conduire, rouler]}
+          - {en: walking, fr: [marcher, se promener, flâner, balade, randonnée, randonner]}
+          - {en: working, fr: [travailler, travail, emploi]}
+          - {en: thinking, fr: [méditer, se recueillir, contempler]}
+          - {en: calling, fr: [téléphoner]}
+          - {en: smoking, fr: [fumer]}
+          - {en: playing, fr: [jouer, jeu, aire de jeux]}
+          - {en: dancing, fr: [danser, danse, bal, guinguette]}
+      - id: leisure_extension
+        source: subject
+        ref: "subject: social behaviours and urban performances"
+        status: extension
+        note: "Activities frequent in Wikipedia tourism and leisure sections, absent from the Koinos list."
+        terms:
+          - {en: swimming, fr: [se baigner, baignade, nager]}
+          - {en: fishing, fr: [pêcher, pêche]}
+          - {en: visiting, fr: [visiter, visite, découvrir]}
+          - {en: gathering, fr: [se retrouver, se rassembler, se réunir]}
+          - {en: water sports, fr: [voile, kayak, canoë, surf, aviron]}
+          - {en: skiing, fr: [ski, skier]}
+
+  reflection:
+    label: Reflections triggered (ideas, thoughts)
+    definition: "Interpretations and meanings a place triggers: reflections, proposals, imaginative visions (Koinos 6 'Ideas', p. 537: free text only). In the paradigm, reflections are imaginary-based arguments leading to expectations of meanings (Table 01, p. 14)."
+    open_issue: "No keyword list exists in the thesis: the Terms-naire Tray omits ideas (p. 380) and Koinos uses free text (p. 537). The markers below are a proposal to be tested against the gold set and an LLM classifier."
+    subcategories:
+      - id: meaning_attribution
+        source: proposal
+        ref: "derived from P91 answers (pp. 457-460): 'represents', 'feeds the imagination', 'reminds me'"
+        status: proposal
+        terms:
+          - {en: symbol of, fr: [symbole de, symbolise, symbolique, incarne, emblème de]}
+          - {en: represents, fr: [représente, témoigne de, illustre, reflète]}
+          - {en: evokes, fr: [évoque, rappelle, fait penser à]}
+          - {en: imagination, fr: [imaginaire, imagination, mythe, légende]}
+      - id: evaluation_reputation
+        source: proposal
+        ref: "evaluative statements about a place"
+        status: proposal
+        terms:
+          - {en: considered as, fr: [considéré comme, qualifié de, réputé, renommé, célèbre pour, connu pour]}
+          - {en: nickname, fr: [surnommé, surnom]}
+          - {en: judgement, fr: [remarquable, exceptionnel, unique, typique, caractéristique]}
+      - id: cognition_proposals
+        source: proposal
+        ref: "reflections, suggestions or visions (Koinos 6, p. 537)"
+        status: proposal
+        terms:
+          - {en: cognitive verbs, fr: [penser, estimer, juger, débattre, controverse, critique]}
+          - {en: projects and visions, fr: [projet, ambition, vision, aspiration, souhaite]}
+
+facets:
+
+  public_space_types:
+    label: The nine open-air public-space types (ch. 15.4, p. 255)
+    source: ch15
+    note: "Controlled vocabulary of the 'public_space_types' field. 'koinos' maps the 18 Koinos types (p. 535) onto the nine types; the mapping is our proposal."
+    types:
+      - {id: sightseeing_site, en: sightseeing sites, ref: "§15.4.1, p. 256", koinos: [landmark], fr: [monument, site touristique, point de vue, belvédère, panorama, lieu emblématique]}
+      - {id: public_square, en: public squares, ref: "§15.4.2, p. 256", koinos: [square/plaza], fr: [place, esplanade, parvis]}
+      - {id: major_boulevard, en: major boulevards, ref: "§15.4.3, p. 257", koinos: [avenue, pedestrian boulevard], fr: [boulevard, avenue, cours, grande artère]}
+      - {id: small_street, en: small streets, ref: "§15.4.4, p. 257", koinos: [street, lane], fr: [rue, ruelle, venelle, passage, traboule, impasse]}
+      - {id: commercial_open_air, en: commercial open-air spaces, ref: "§15.4.5, p. 258", koinos: [terrace], fr: [terrasse, rue commerçante, rue piétonne, marché]}
+      - {id: popup_street_market, en: pop-up street markets, ref: "§15.4.6, p. 259", koinos: [street market, entertainment-fair], fr: [marché de noël, brocante, vide-grenier, braderie, marché nocturne, fête foraine]}
+      - {id: metropolitan_park, en: metropolitan parks, ref: "§15.4.7, p. 259", koinos: [park, amusement park], fr: [parc, grand parc, bois, parc urbain]}
+      - {id: small_garden, en: small gardens, ref: "§15.4.8, p. 260", koinos: [garden], fr: [jardin, square, jardin partagé, jardin familial]}
+      - {id: promenade, en: promenades, ref: "§15.4.9, p. 261", koinos: [promenade, marina, pedestrian bridge], fr: [promenade, quai, berges, front de mer, corniche, chemin de halage]}
+    unmapped_koinos: [mountain, pond, swimming pool, sport features]
+
+  register:
+    label: Register of the text (subject; §16.2-16.3, pp. 267-270)
+    note: "Spectacle = images produced by social powers, branding, labels (Debord); imaginary = collective, grassroots narratives (Silva). Most encyclopaedic sentences are 'descriptive'."
+    values:
+      - {id: descriptive, definition: "neutral encyclopaedic statement"}
+      - {id: imaginary, definition: "shared narrative, legend, nickname, collective memory (Silva)", fr: [légende, surnommé, on raconte, tradition orale, mémoire collective]}
+      - {id: spectacle, definition: "branding, labels, rankings, promotional imagery (Debord)", fr: [label, ville fleurie, plus beaux villages de france, ville d'art et d'histoire, attractivité, slogan, marque, classement]}

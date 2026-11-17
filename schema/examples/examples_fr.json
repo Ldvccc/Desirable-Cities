@@ -1,0 +1,108 @@
+[
+  {
+    "schema_version": "1.0.0",
+    "sentence_id": "69123-fr-0-s0",
+    "insee": "69123",
+    "langue": "fr",
+    "section_type": "geography",
+    "text": "La ville est traversée par le Rhône et la Saône.",
+    "environments": [
+      {"category": "natural", "evidence": "traversée par le Rhône et la Saône", "tags": ["natural.water_features.river"]}
+    ],
+    "responses": [],
+    "pid_cells": [],
+    "public_space_types": [],
+    "register": "descriptive",
+    "uncertain": false,
+    "comment": "Illustrative example. Describes what is there, no response: the case the subject expects to be most frequent.",
+    "annotator": {"kind": "human", "id": "IV", "date": "2026-11-01"}
+  },
+  {
+    "schema_version": "1.0.0",
+    "sentence_id": "69123-fr-0-s1",
+    "insee": "69123",
+    "langue": "fr",
+    "section_type": "geography",
+    "text": "Les quais du Rhône sont un lieu de promenade apprécié des Lyonnais.",
+    "environments": [
+      {"category": "constructural", "evidence": "Les quais du Rhône", "tags": ["constructural.open_air_public_spaces.promenade"]},
+      {"category": "natural", "evidence": "Rhône", "tags": ["natural.water_features.river"]}
+    ],
+    "responses": [
+      {"category": "action", "evidence": "lieu de promenade", "tags": ["action.koinos_actions.walking"]},
+      {"category": "emotion", "evidence": "apprécié des Lyonnais", "tags": ["emotion.koinos_emotions.comfort"]}
+    ],
+    "pid_cells": [
+      {"environment": "constructural", "response": "action"},
+      {"environment": "constructural", "response": "emotion"}
+    ],
+    "public_space_types": ["promenade"],
+    "register": "descriptive",
+    "uncertain": false,
+    "comment": "Illustrative example. The response is attached to the quays (constructural), not to the river.",
+    "annotator": {"kind": "human", "id": "IV", "date": "2026-11-01"}
+  },
+  {
+    "schema_version": "1.0.0",
+    "sentence_id": "69123-fr-0-s2",
+    "insee": "69123",
+    "langue": "fr",
+    "section_type": "heritage",
+    "text": "La place Bellecour est l'une des plus grandes places d'Europe.",
+    "environments": [
+      {"category": "constructural", "evidence": "La place Bellecour", "tags": ["constructural.open_air_public_spaces.square_plaza"]}
+    ],
+    "responses": [],
+    "pid_cells": [],
+    "public_space_types": ["public_square"],
+    "register": "descriptive",
+    "uncertain": false,
+    "annotator": {"kind": "human", "id": "IV", "date": "2026-11-01"}
+  },
+  {
+    "schema_version": "1.0.0",
+    "sentence_id": "69123-fr-0-s3",
+    "insee": "69123",
+    "langue": "fr",
+    "section_type": "heritage",
+    "text": "Fourvière est surnommée « la colline qui prie ».",
+    "environments": [
+      {"category": "natural", "evidence": "la colline", "tags": ["natural.green_features.hill"]},
+      {"category": "cultural", "evidence": "qui prie", "tags": ["cultural.atmosphere.sacred"]}
+    ],
+    "responses": [
+      {"category": "reflection", "evidence": "surnommée « la colline qui prie »", "tags": ["reflection.evaluation_reputation.nickname"]}
+    ],
+    "pid_cells": [
+      {"environment": "natural", "response": "reflection"},
+      {"environment": "cultural", "response": "reflection"}
+    ],
+    "public_space_types": [],
+    "register": "imaginary",
+    "uncertain": false,
+    "comment": "Illustrative example. A nickname is a collective meaning given to the place (Silva's imaginaries).",
+    "annotator": {"kind": "human", "id": "IV", "date": "2026-11-01"}
+  },
+  {
+    "schema_version": "1.0.0",
+    "sentence_id": "69123-fr-0-s4",
+    "insee": "69123",
+    "langue": "fr",
+    "section_type": "culture",
+    "text": "La fête des Lumières attire chaque année des millions de visiteurs.",
+    "environments": [
+      {"category": "cultural", "evidence": "La fête des Lumières", "tags": ["cultural.events_festivals.festival"]}
+    ],
+    "responses": [
+      {"category": "action", "evidence": "attire chaque année des millions de visiteurs", "tags": ["action.leisure_extension.visiting"]}
+    ],
+    "pid_cells": [
+      {"environment": "cultural", "response": "action"}
+    ],
+    "public_space_types": [],
+    "register": "spectacle",
+    "uncertain": true,
+    "comment": "Illustrative example. Register to discuss: a popular tradition (imaginary) that is also a branded mass event (spectacle).",
+    "annotator": {"kind": "human", "id": "IV", "date": "2026-11-01"}
+  }
+]

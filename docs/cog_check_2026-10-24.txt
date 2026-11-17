@@ -1,0 +1,33 @@
+COG communes (TYPECOM=COM): 34875
+My extraction             : 34876
+Difference                : +1
+
+MISSING (in COG, not in Wikidata extraction): 0
+
+EXTRA (in extraction, not in COG): 1
+      qid insee           name    pop     lat
+Q26275353 27058 Les Trois Lacs 1735.0 49.2339
+
+Departments with a different count: 1
+    cog  mine  diff
+27  585   586     1
+
+Rows without name (7):
+     qid insee     pop
+ Q128369 56162 18872.0
+Q1362121 28274   246.0
+ Q477174 62486  1070.0
+ Q567795 63320   208.0
+ Q645656 95218 18436.0
+ Q744569 74116  2180.0
+ Q900702 76715   608.0
+Rows without coordinates (8):
+     qid insee         name
+Q1327103 65237     Juncalas
+Q1614042 86250         Saix
+ Q274190 33066   Bourdelles
+ Q286816 16077  Champmillon
+ Q379899 33204         Hure
+ Q639113 72216 Neuvillalais
+ Q720248 33347   Puynormand
+ Q720532 33291  Montagoudin

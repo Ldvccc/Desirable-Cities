@@ -1,0 +1,11 @@
+# Secrets
+.env
+
+# Données (trop lourdes, régénérées par le code)
+data/raw/
+data/processed/
+*.parquet
+*.sqlite
+__pycache__/
+*.pyc
+.pytest_cache/

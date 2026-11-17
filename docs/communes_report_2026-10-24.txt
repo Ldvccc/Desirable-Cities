@@ -1,0 +1,120 @@
+Departments queried : 101 (failed: none)
+Raw rows (before keeping latest population): 499125
+Communes (unique INSEE codes): 34875
+INSEE/DGCL reference (1 Jan 2026): 34875
+Difference: +0
+Missing name: 7
+Missing population: 0
+Missing coordinates: 8
+INSEE codes shared by several items: 0
+Items with several INSEE codes: 0
+  none
+Items added manually (EXTRA_QIDS, not typed 'commune of France'):
+qid insee  name
+Q90 75056 Paris
+Items excluded (EXCLUDE_INSEE, old INSEE codes):
+      qid insee           name
+Q26275353 27058 Les Trois Lacs
+Per-department counts:
+insee
+01     391
+02     797
+03     317
+04     198
+05     162
+06     163
+07     335
+08     447
+09     325
+10     431
+11     433
+12     285
+13     119
+14     526
+15     250
+16     359
+17     462
+18     286
+19     277
+21     698
+22     344
+23     255
+24     503
+25     563
+26     362
+27     585
+28     363
+29     277
+2A     124
+2B     236
+30     350
+31     586
+32     458
+33     534
+34     341
+35     332
+36     241
+37     272
+38     512
+39     492
+40     327
+41     267
+42     320
+43     257
+44     207
+45     325
+46     312
+47     319
+48     152
+49     176
+50     445
+51     610
+52     426
+53     240
+54     591
+55     499
+56     249
+57     725
+58     309
+59     647
+60     680
+61     381
+62     887
+63     463
+64     545
+65     469
+66     226
+67     514
+68     366
+69     266
+70     536
+71     563
+72     352
+73     273
+74     279
+75       1
+76     707
+77     507
+78     259
+79     252
+80     771
+81     314
+82     195
+83     153
+84     151
+85     253
+86     265
+87     195
+88     506
+89     423
+90     101
+91     194
+92      36
+93      39
+94      47
+95     183
+971     32
+972     34
+973     22
+974     24
+976     17
