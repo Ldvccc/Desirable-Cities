@@ -1,0 +1,51 @@
+n,word,keyword,code,human_a,human_b,ai
+1,culturelle,culturel,C,1,1,1
+2,historique,histoire,C,1,1,1
+3,climatiques,climat,N,1,1,1
+4,nature,naturel,N,1,0,1
+5,climat,climat,N,1,1,1
+6,climat,climat,N,1,1,1
+7,montagne,montagne,N,1,1,1
+8,climatiques,climat,N,1,1,1
+9,climat,climat,N,1,1,1
+10,climat,climat,N,1,1,1
+11,été,été,N,1,1,1
+12,saison,saison,N,1,1,1
+13,sèche,sécheresse,N,0,1,1
+14,climats,climat,N,1,1,1
+15,climat,climat,N,1,1,1
+16,climatiques,climat,N,1,1,1
+17,plateau,plateau,N,1,1,1
+18,constructions,constructurel,B,1,1,1
+19,température,température,N,1,1,1
+20,"9,9 °C",value in °C,N,1,1,1
+21,"17,1 °C",value in °C,N,1,1,1
+22,température,température,N,1,1,1
+23,météorologique,météo,N,0,1,1
+24,"11,5 °C",value in °C,N,1,1,1
+25,température,température,N,1,1,1
+26,"40,2 °C",value in °C,N,1,1,1
+27,température,température,N,1,1,1
+28,−17 °C,value in °C,N,1,1,1
+29,urbaine,urbain,C,1,1,1
+30,forêts,forêt,N,1,1,1
+31,semi-naturels,naturel,N,1,1,1
+32,forêts,forêt,N,1,1,1
+33,prairies,prairie,N,1,1,1
+34,agricoles,agriculture,C,1,1,1
+35,urbanisées,urbain,C,1,1,1
+36,végétation,végétation,N,1,1,1
+37,herbacée,herbe,N,1,1,1
+38,infrastructures,infrastructure,B,1,1,1
+39,célèbre,célèbre,R>N,1,1,1
+40,vignes,vignoble,N,0,1,1
+41,vergers,verger,N,1,1,1
+42,village,village,B,1,1,1
+43,communauté,communauté,C,1,0,1
+44,église,église,B,1,1,1
+45,fontaines,fontaine,B,1,1,1
+46,mairie,mairie,B,1,1,1
+47,école,école,B,1,1,1
+48,agricole,agriculture,C,1,1,1
+49,village,village,B,1,1,1
+50,logements,logement,B,1,1,1

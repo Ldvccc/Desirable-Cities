@@ -1,5 +1,8 @@
 # Coding guide v0.1
 
+> **Superseded** by [rules_manual_coding_v2.md](rules_manual_coding_v2.md) and the keyword list v3
+> (14 November 2026): word-level coding with a closed list. Kept for the history of the scheme.
+
 Ivann Vasic, Ludovic Blondeau · 12 November 2026 · goes with `schema/annotation_schema_v1.json` and `schema/lexicon_v0.yaml`
 
 This guide tells a human coder (and later the LLM prompt) how to annotate one sentence. Two coders who follow it should give the same answer. When they do not, the rule that was missing is added at the end (section 7) and the version number goes up.

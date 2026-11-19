@@ -4,3 +4,4 @@ pyarrow
 pytest
 pyyaml
 jsonschema>=4.18
+reportlab

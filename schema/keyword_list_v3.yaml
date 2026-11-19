@@ -1,0 +1,517 @@
+# Desirable Cities: keyword list v3 (machine-readable version)
+#
+# Source document: docs/keyword_list_v3.pdf (Ivann Vasic, Ludovic Blondeau,
+# supervised by Fabien Pfaender and John Villar, 14 November 2026).
+# Coding rules:    docs/rules_manual_coding_v2.md
+#
+# Two layers, kept apart on purpose:
+#
+# 1. The LIST itself: `tag`, `fr`, `src`, and the code of the section the
+#    entry is in. This is exactly the PDF (341 entries, duplicates included).
+#    Do not edit it without a new version of the list.
+#
+# 2. The ENCODING of the rules for the algorithm (keyword_coder.py, method
+#    A-form). It does not change the list; it spells out what the rules mean
+#    for each entry:
+#      pos      n (noun, default) | adj | v (verb) | expr (multi-word) |
+#               inv (invariable) | value (°C values, rule I6)
+#      lemma    singular form when the list gives a plural ("vagues")
+#      plural   irregular plural ("hôpitaux")
+#      forms    words built on the same French stem (rule I1), inflected
+#               automatically (plural, feminine). PROPOSED by the algorithm
+#               authors, to be checked by the coders.
+#      conj     extra or irregular conjugated forms of a verb
+#      verb     a verb whose conjugated forms count (rule I1: "critiqué")
+#      drop     generated forms that are another word ("marché" is not
+#               "marcher": it is the B entry "marché")
+#      exclude  fixed expressions and homonyms (rule I4). Regular
+#               expressions on the sentence, case-insensitive; a space
+#               matches any run of spaces and ' matches ' and ’.
+#      require  det       the lemma counts only after a determiner ("le son",
+#                         not the possessive "son")
+#               reflexive the verb counts only with a reflexive pronoun
+#                         ("se reposer", not "repose sur le bassin")
+#               ete       "été" is the season, not the participle of "être"
+#      when     rule D1: the code holds only in that context (sound, smell,
+#               feeling); `else` gives the code otherwise
+#      code     code to use instead of the section code (rule D2)
+#      case     exact: match the case of `fr` (acronyms)
+
+version: 3.0.0
+date: "2026-11-14"
+title: "Desirable Cities: keyword list v3"
+document: docs/keyword_list_v3.pdf
+rules: docs/rules_manual_coding_v2.md
+sources:
+  G: "name of a category or subcategory (rule I2)"
+  K: "Koinos tag (thesis §31.2.3.7, pp. 534-537)"
+  T: "Emotion-naire Cards (thesis p. 367)"
+  E: "extension"
+  P: "reflection marker (the thesis gives no list for reflections)"
+codes:
+  N: natural
+  C: cultural
+  B: constructural
+  E: emotion
+  A: action
+  R: reflection
+
+categories:
+
+  N:
+    label: Natural environment
+    groups:
+      - name: Category and subcategory names (rule I2)
+        entries:
+          - {tag: natural, fr: naturel, src: G, pos: adj, forms: [nature, naturellement]}
+          - {tag: season, fr: saison, src: G, forms: [saisonnier]}
+          - {tag: weather, fr: météo, src: G, forms: [météorologique, météorologie, météorologue, météorologiste]}
+          - {tag: time of day, fr: moment de la journée, src: G, pos: expr}
+          - {tag: temperature, fr: température, src: G}
+          - {tag: water features, fr: eau, src: G}
+          - {tag: green features, fr: végétation, src: G, forms: [végétal, végétalisé, végétalisation]}
+      - name: Season (Koinos 1.1)
+        entries:
+          - {tag: winter, fr: hiver, src: K, forms: [hivernal]}
+          - {tag: spring, fr: printemps, src: K, pos: inv, forms: [printanier]}
+          - {tag: summer, fr: été, src: K, require: ete}
+          - {tag: autumn, fr: automne, src: K, forms: [automnal]}
+          - {tag: raining, fr: saison des pluies, src: K, pos: expr}
+          - {tag: dry, fr: sécheresse, src: K, forms: [sec, sèche, sécher, séché, asséché, assèchement]}
+      - name: Weather (Koinos 1.2)
+        entries:
+          - {tag: sunny, fr: ensoleillé, src: K, pos: adj, forms: [ensoleillement, soleil]}
+          - {tag: cloudy, fr: nuageux, src: K, pos: adj, forms: [nuage]}
+          - {tag: windy, fr: venteux, src: K, pos: adj}
+          - {tag: rainy, fr: pluvieux, src: K, pos: adj, forms: [pluie, pluvial, pluviométrie, pluviométrique, pluviosité]}
+          - {tag: stormy, fr: orageux, src: K, pos: adj, forms: [orage]}
+          - {tag: rainbow, fr: arc-en-ciel, src: K, pos: expr}
+          - {tag: snow, fr: neige, src: K, forms: [neigeux, enneigé, enneigement, neiger]}
+          - {tag: mist, fr: brume, src: K, forms: [brumeux]}
+          - {tag: fog, fr: brouillard, src: K}
+          - {tag: moon, fr: lune, src: K, forms: [lunaire]}
+          - {tag: stars-full, fr: étoilé, src: K, pos: adj, forms: [étoile]}
+      - name: Time of day (Koinos 1.3)
+        entries:
+          - {tag: early morning, fr: aube, src: K}
+          - {tag: morning, fr: matin, src: K, forms: [matinée, matinal]}
+          - {tag: late morning, fr: fin de matinée, src: K, pos: expr}
+          - {tag: noon, fr: midi, src: K}
+          - {tag: early afternoon, fr: début d’après-midi, src: K, pos: expr}
+          - {tag: afternoon, fr: après-midi, src: K, pos: expr}
+          - {tag: late afternoon, fr: fin d’après-midi, src: K, pos: expr}
+          - {tag: evening, fr: soir, src: K, forms: [soirée]}
+          - {tag: late evening, fr: nuit, src: K, forms: [nuitée]}
+          - {tag: dawn, fr: aurore, src: K}
+      - name: Temperature (Koinos 1.4)
+        entries:
+          - {tag: "temperature (−10 to 45 °C)", fr: "any value in °C (rule I6)", src: K, pos: value}
+      - name: Natural sounds (Koinos 1.5)
+        entries:
+          - {tag: sea waves, fr: vagues, src: K, lemma: vague}
+          - {tag: river, fr: rivière, src: K}
+          - {tag: falls, fr: cascade, src: K}
+          - {tag: birds, fr: oiseaux, src: K, lemma: oiseau, exclude: ['vol d''oiseau']}
+          - {tag: dogs, fr: chiens, src: K, lemma: chien, forms: [chienne]}
+          - {tag: cats, fr: chats, src: K, lemma: chat}
+          - {tag: wind, fr: vent, src: K}
+          - {tag: breeze, fr: brise, src: K, exclude: ['brise-lames', 'brise-glace', 'brise-vent']}
+      - name: Water features (Koinos 1.6)
+        entries:
+          - {tag: sea, fr: mer, src: K}
+          - {tag: river, fr: rivière, src: K}
+          - {tag: fall, fr: cascade, src: K}
+          - {tag: lake, fr: lac, src: K}
+      - name: Green features (Koinos 1.7)
+        entries:
+          - {tag: volcano, fr: volcan, src: K, forms: [volcanique, volcanisme]}
+          - {tag: mountain, fr: montagne, src: K, forms: [montagneux, montagnard]}
+          - {tag: hill, fr: colline, src: K}
+          - {tag: forest, fr: forêt, src: K, forms: [forestier, déforestation, reforestation]}
+          - {tag: trees, fr: arbres, src: K, lemma: arbre}
+          - {tag: bushes, fr: buissons, src: K, lemma: buisson}
+          - {tag: grass, fr: herbe, src: K, forms: [herbacé, herbage, herbeux]}
+          - {tag: flowers, fr: fleurs, src: K, lemma: fleur, forms: [fleuri, fleurir, fleurissement, fleuriste], exclude: ['à fleur de']}
+          - {tag: blossoming, fr: floraison, src: K}
+          - {tag: island, fr: île, src: K, forms: [îlot, presqu'île]}
+      - name: Extension
+        entries:
+          - {tag: landscape, fr: paysage, src: E, forms: [paysager, paysagiste]}
+          - {tag: climate, fr: climat, src: E, forms: [climatique, climatologie, climatologique, climatisation, climatisé]}
+          - {tag: heat, fr: chaleur, src: E}
+          - {tag: cold, fr: froid, src: E, pos: adj, forms: [froidure, refroidissement]}
+          - {tag: dusk, fr: crépuscule, src: E, forms: [crépusculaire]}
+          - {tag: relief, fr: relief, src: E}
+          - {tag: valley, fr: vallée, src: E, forms: [vallon, vallonné, vallonnement]}
+          - {tag: plain, fr: plaine, src: E}
+          - {tag: plateau, fr: plateau, src: E}
+          - {tag: cliff, fr: falaise, src: E}
+          - {tag: gorge, fr: gorge, src: E}
+          - {tag: rock, fr: rocher, src: E, forms: [roche, rocheux]}
+          - {tag: cave, fr: grotte, src: E}
+          - {tag: geology, fr: géologie, src: E, forms: [géologique, géologue]}
+          - {tag: coast, fr: côte, src: E, forms: [côtier], exclude: ['côte à côte']}
+          - {tag: beach, fr: plage, src: E}
+          - {tag: marsh, fr: marais, src: E, pos: inv}
+          - {tag: spring (water), fr: source, src: E, exclude: ['selon (?:les |des |certaines |d''autres )?sources', 'de source sûre', 'sources? (?:historiques?|écrites?|anciennes?|documentaires?|bibliographiques?)']}
+          - {tag: meadow, fr: prairie, src: E}
+          - {tag: field, fr: champ, src: E, forms: [champêtre], exclude: ['champ d''action', 'champ d''application', 'champs? de vision', 'champs? électromagnétiques?']}
+          - {tag: orchard, fr: verger, src: E}
+          - {tag: vineyard, fr: vignoble, src: E, forms: [vigne, vigneron]}
+          - {tag: fauna, fr: faune, src: E, forms: [faunistique]}
+          - {tag: flora, fr: flore, src: E, forms: [floristique]}
+          - {tag: biodiversity, fr: biodiversité, src: E}
+          - {tag: nature reserve, fr: réserve naturelle, src: E, pos: expr}
+
+  C:
+    label: Cultural environment
+    groups:
+      - name: Category and subcategory names (rule I2)
+        entries:
+          - {tag: cultural, fr: culturel, src: G, pos: adj, forms: [culture, culturellement],
+             exclude: ['cultures? (?:permanentes?|annuelles?|céréalières?|maraîchères?|intensives?|fourragères?|vivrières?|industrielles?|arables?)',
+                       'cultures? (?:de |du |des |de la |de l'')(?:vigne|blé|maïs|céréales|tabac|houblon|lin|chanvre|betteraves?|oliviers?|légumes|fruits|pommes de terre)',
+                       '(?:grandes|petites) cultures', 'terres? de cultures?', 'mises? en culture', 'en culture']}
+          - {tag: social crowd, fr: foule, src: G}
+          - {tag: atmosphere, fr: ambiance, src: G}
+          - {tag: sound, fr: son, src: G, require: det, forms: [sonore, sonorité]}
+          - {tag: smell, fr: odeur, src: G}
+      - name: Social crowd density (Koinos 2.1)
+        entries:
+          - {tag: nobody, fr: désert, src: K, pos: adj, forms: [déserté, désertique, désertification]}
+          - {tag: few people, fr: peu fréquenté, src: K, pos: expr}
+          - {tag: people, fr: passants, src: K, lemma: passant, require: det}
+          - {tag: many people, fr: affluence, src: K}
+          - {tag: crowded, fr: foule, src: K}
+      - name: Atmosphere (Koinos 2.2)
+        entries:
+          - {tag: relax, fr: détente, src: K}
+          - {tag: peaceful, fr: paisible, src: K, forms: [paisiblement]}
+          - {tag: mistic (mystic), fr: mystique, src: K, forms: [mysticisme]}
+          - {tag: sacred, fr: sacré, src: K, pos: adj}
+          - {tag: cultural, fr: culturel, src: K, pos: adj}
+          - {tag: educational, fr: éducatif, src: K, pos: adj, forms: [éducation]}
+          - {tag: artistic, fr: artistique, src: K, forms: [artiste, art], exclude: ['ouvrages? d''art']}
+          - {tag: festive, fr: festif, src: K, pos: adj, forms: [festivité]}
+          - {tag: sportive, fr: sportif, src: K, pos: adj, forms: [sport]}
+          - {tag: urban, fr: urbain, src: K, pos: adj, forms: [urbanisé, urbanisme, périurbain, urbanité]}
+          - {tag: safe, fr: sûr, src: K, pos: adj, forms: [sûreté], exclude: ['bien sûr', 'à coup sûr', 'sûr(?:e|s|es)? de']}
+          - {tag: clean, fr: propre, src: K, pos: adj, forms: [propreté],
+             exclude: ['fiscalité propre', 'noms? propres?', 'sens propre', 'fonds propres', 'en propre', 'propres? à',
+                       'amour-propre', '(?:son|sa|ses|leur|leurs|notre|nos|mon|ma|mes|votre|vos) propres?']}
+      - name: Sounds (Koinos 2.3)
+        entries:
+          - {tag: quiet, fr: calme, src: K, forms: [calmement]}
+          - {tag: people, fr: brouhaha, src: K}
+          - {tag: cars, fr: voitures, src: K, lemma: voiture, when: {context: sound, else: B}}
+          - {tag: trains, fr: trains, src: K, lemma: train, when: {context: sound, else: B},
+             exclude: ['en train de', 'trains? de vie', 'trains? de (?:mesures|réformes)']}
+          - {tag: planes, fr: avions, src: K, lemma: avion}
+          - {tag: bicycles, fr: vélos, src: K, lemma: vélo, when: {context: sound, else: B}}
+          - {tag: music, fr: musique, src: K, forms: [musical, musicien]}
+          - {tag: busy, fr: bruyant, src: K, pos: adj, forms: [bruit]}
+      - name: Smells (Koinos 2.4)
+        entries:
+          - {tag: restaurants, fr: restaurants, src: K, lemma: restaurant, when: {context: smell, else: B}}
+          - {tag: bakeries, fr: boulangeries, src: K, lemma: boulangerie, forms: [boulanger]}
+          - {tag: bars, fr: bars, src: K, lemma: bar, when: {context: smell, else: B}, exclude: ['\d+(?:,\d+)? bars?']}
+          - {tag: food markets, fr: marchés, src: K, lemma: marché, when: {context: smell, else: B},
+             exclude: ['marchés? du travail', 'marchés? de l''emploi', 'marchés? immobiliers?', 'bon marché',
+                       'parts? de marché', 'marchés? financiers?', 'marché commun', 'marchés? publics?']}
+      - name: Extension
+        entries:
+          - {tag: history, fr: histoire, src: E, forms: [historique, historien, historiquement, préhistoire, préhistorique, historiographie]}
+          - {tag: heritage, fr: patrimoine, src: E, forms: [patrimonial]}
+          - {tag: archaeology, fr: archéologie, src: E, forms: [archéologique, archéologue]}
+          - {tag: remains, fr: vestiges, src: E, lemma: vestige}
+          - {tag: memory, fr: mémoire, src: E, forms: [mémoriel]}
+          - {tag: legend, fr: légende, src: E, forms: [légendaire]}
+          - {tag: tradition, fr: tradition, src: E, forms: [traditionnel, traditionnellement]}
+          - {tag: festival, fr: festival, src: E}
+          - {tag: fair, fr: foire, src: E}
+          - {tag: carnival, fr: carnaval, src: E, forms: [carnavalesque]}
+          - {tag: religion, fr: religion, src: E, forms: [religieux, religieusement]}
+          - {tag: pilgrimage, fr: pèlerinage, src: E, forms: [pèlerin]}
+          - {tag: gastronomy, fr: gastronomie, src: E, forms: [gastronomique]}
+          - {tag: local speciality, fr: spécialité, src: E}
+          - {tag: wine, fr: vin, src: E}
+          - {tag: cheese, fr: fromage, src: E, forms: [fromager, fromagerie]}
+          - {tag: terroir, fr: terroir, src: E}
+          - {tag: identity, fr: identité, src: E, forms: [identitaire]}
+          - {tag: coat of arms, fr: blason, src: E, forms: [blasonnement]}
+          - {tag: twinning, fr: jumelage, src: E, forms: [jumelé]}
+          - {tag: regional language, fr: patois, src: E, pos: inv}
+          - {tag: association, fr: association, src: E, forms: [associatif]}
+          - {tag: community, fr: communauté, src: E, forms: [communautaire]}
+          - {tag: tourism, fr: tourisme, src: E, forms: [touristique, touriste]}
+          - {tag: craftsmanship, fr: artisanat, src: E, forms: [artisan, artisanal]}
+          - {tag: agriculture, fr: agriculture, src: E, forms: [agricole, agriculteur, agricultrice]}
+          - {tag: industry, fr: industrie, src: E, forms: [industriel, industrialisation, industrialisé]}
+
+  B:
+    label: Constructural environment
+    groups:
+      - name: Category and subcategory names (rule I2)
+        entries:
+          - {tag: constructural, fr: constructurel, src: G, pos: adj,
+             forms: [construction, construire, construit, construisit, construisirent, construisent, construisait,
+                     reconstruction, reconstruire, reconstruit, constructeur]}
+          - {tag: open-air public space, fr: espace public, src: G, pos: expr}
+          - {tag: visual reference, fr: repère visuel, src: G, pos: expr}
+          - {tag: transportation, fr: transport, src: G}
+          - {tag: infrastructure, fr: infrastructure, src: G}
+      - name: Open-air public spaces (Koinos 3.1)
+        entries:
+          - {tag: square/plaza, fr: place, src: K,
+             exclude: ['(?:prendre|prend|prennent|prenait|prenaient|pris|prise|prirent) place', 'en place', 'sur place',
+                       '(?:se|s'') plac\w*', 'plac\w* en (?:tête|\w+ position)',
+                       'à (?:la|sa|leur) place', 'laiss\w* (?:la )?place', 'fai\w* place', 'fit place',
+                       'c[èé]d\w* (?:la )?place', 'en lieu et place', '(?:\d+e|\d+ᵉ|première|deuxième|troisième|dernière) place']}
+          - {tag: park, fr: parc, src: K}
+          - {tag: garden, fr: jardin, src: K, forms: [jardinier]}
+          - {tag: promenade, fr: promenade, src: K}
+          - {tag: marina, fr: port de plaisance, src: K, pos: expr}
+          - {tag: avenue, fr: avenue, src: K}
+          - {tag: street, fr: rue, src: K}
+          - {tag: lane, fr: ruelle, src: K}
+          - {tag: pedestrian bridge, fr: passerelle, src: K}
+          - {tag: pedestrian boulevard, fr: rue piétonne, src: K, pos: expr}
+          - {tag: terrace, fr: terrasse, src: K}
+          - {tag: mountain, fr: montagne, src: K, code: N, forms: [montagneux, montagnard]}
+          - {tag: pond, fr: bassin, src: K,
+             exclude: ['bassins? (?:houillers?|miniers?|versants?|hydrographiques?|sédimentaires?|potassiques?|ferrifères?|parisien|aquitain)',
+                       'bassins? (?:de vie|d''emplois?|d''habitat|de population|d''alimentation|de risques?)',
+                       'bassins? (?:de la |du |de l''|des )(?-i:[A-ZÀ-Ý])']}
+          - {tag: swimming pool, fr: piscine, src: K}
+          - {tag: sport features, fr: stade, src: K, exclude: ['à ce stade', 'au stade de', '(?:premier|dernier) stade']}
+          - {tag: entertainment-fair, fr: fête foraine, src: K, pos: expr}
+          - {tag: amusement park, fr: parc d’attractions, src: K, pos: expr}
+          - {tag: street market, fr: marché, src: K, forms: [marchand],
+             exclude: ['marchés? du travail', 'marchés? de l''emploi', 'marchés? immobiliers?', 'bon marché',
+                       'parts? de marché', 'marchés? financiers?', 'marché commun', 'marchés? publics?']}
+      - name: Visual references (Koinos 3.2)
+        entries:
+          - {tag: landmark, fr: monument, src: K, forms: [monumental]}
+          - {tag: skyline, fr: silhouette, src: K}
+          - {tag: intersection, fr: carrefour, src: K}
+      - name: Transportation systems (Koinos 3.3)
+        entries:
+          - {tag: metro/subway, fr: métro, src: K}
+          - {tag: elevated metro, fr: métro aérien, src: K, pos: expr}
+          - {tag: bus, fr: bus, src: K, pos: inv, forms: [autobus]}
+          - {tag: tourist bus, fr: bus touristique, src: K, pos: expr}
+          - {tag: monorail, fr: monorail, src: K}
+          - {tag: cable car, fr: téléphérique, src: K}
+          - {tag: funicular, fr: funiculaire, src: K}
+          - {tag: tram, fr: tramway, src: K, forms: [tram]}
+          - {tag: ferry, fr: bac, src: K, exclude: ['bac ?\+']}
+          - {tag: river-boat, fr: bateau, src: K, forms: [batelier, batellerie]}
+          - {tag: taxi, fr: taxi, src: K}
+          - {tag: didi (ride-hailing), fr: VTC, src: K, pos: inv, case: exact}
+          - {tag: private car, fr: voiture, src: K}
+          - {tag: motorbike, fr: moto, src: K}
+          - {tag: scooter, fr: scooter, src: K}
+          - {tag: bike, fr: vélo, src: K, forms: [vélodrome, véloroute, vélorail]}
+          - {tag: sharing bike, fr: vélo en libre-service, src: K, pos: expr}
+          - {tag: skate, fr: skate, src: K}
+      - name: Infrastructure (Koinos 3.4)
+        entries:
+          - {tag: tunnel, fr: tunnel, src: K}
+          - {tag: trains-rails, fr: voie ferrée, src: K, pos: expr}
+          - {tag: highways, fr: autoroute, src: K, forms: [autoroutier]}
+          - {tag: bridge, fr: pont, src: K}
+          - {tag: roundabout, fr: rond-point, src: K, pos: expr}
+          - {tag: bus lanes, fr: voie de bus, src: K, pos: expr}
+          - {tag: bike lanes, fr: piste cyclable, src: K, pos: expr}
+          - {tag: skate parks, fr: skatepark, src: K}
+          - {tag: pedestrian bridge, fr: passerelle, src: K}
+          - {tag: pedestrian under-pass, fr: passage souterrain, src: K, pos: expr}
+          - {tag: parking lots, fr: parking, src: K}
+          - {tag: flood control, fr: digue, src: K}
+          - {tag: electric grid, fr: réseau électrique, src: K, pos: expr}
+      - name: Emotion-naire Cards (thesis, p. 367)
+        entries:
+          - {tag: paths, fr: axe, src: T}
+          - {tag: edges, fr: rempart, src: T}
+          - {tag: nodes, fr: centre-ville, src: T, pos: expr}
+          - {tag: hotel, fr: hôtel, src: T, forms: [hôtelier, hôtellerie]}
+          - {tag: restaurants, fr: restaurant, src: T}
+          - {tag: shops, fr: commerce, src: T, forms: [commercial, commerçant, commercialisation]}
+      - name: Extension
+        entries:
+          - {tag: building, fr: bâtiment, src: E, forms: [bâti, bâtir, bâtisse]}
+          - {tag: architecture, fr: architecture, src: E, forms: [architectural, architecte]}
+          - {tag: house, fr: maison, src: E}
+          - {tag: housing, fr: logement, src: E}
+          - {tag: apartment building, fr: immeuble, src: E}
+          - {tag: church, fr: église, src: E}
+          - {tag: chapel, fr: chapelle, src: E}
+          - {tag: cathedral, fr: cathédrale, src: E}
+          - {tag: abbey, fr: abbaye, src: E}
+          - {tag: castle, fr: château, src: E, forms: [châtelain]}
+          - {tag: town hall, fr: mairie, src: E}
+          - {tag: school, fr: école, src: E}
+          - {tag: secondary school, fr: collège, src: E, exclude: ['collèges? électora(?:l|ux)']}
+          - {tag: high school, fr: lycée, src: E, forms: [lycéen]}
+          - {tag: university, fr: université, src: E, forms: [universitaire]}
+          - {tag: hospital, fr: hôpital, src: E, plural: hôpitaux, forms: [hospitalier]}
+          - {tag: museum, fr: musée, src: E}
+          - {tag: theatre, fr: théâtre, src: E, forms: [théâtral],
+             exclude: ['(?:fut|est|était|a été|devient|devint|sera|furent|sont) (?:alors )?(?:le |la |les )?théâtres?']}
+          - {tag: cinema, fr: cinéma, src: E, forms: [cinématographique]}
+          - {tag: library, fr: bibliothèque, src: E}
+          - {tag: village hall, fr: salle des fêtes, src: E, pos: expr}
+          - {tag: fountain, fr: fontaine, src: E}
+          - {tag: wash house, fr: lavoir, src: E}
+          - {tag: mill, fr: moulin, src: E}
+          - {tag: wayside cross, fr: calvaire, src: E}
+          - {tag: war memorial, fr: monument aux morts, src: E, pos: expr}
+          - {tag: water tower, fr: château d’eau, src: E, pos: expr}
+          - {tag: factory, fr: usine, src: E}
+          - {tag: farm, fr: ferme, src: E, require: det, forms: [fermier], exclude: ['terre ferme']}
+          - {tag: mine, fr: mine, src: E, forms: [minier], exclude: ['mine de rien', 'bonne mine', 'grise mine']}
+          - {tag: town, fr: ville, src: E}
+          - {tag: village, fr: village, src: E, forms: [villageois]}
+          - {tag: small town, fr: bourg, src: E, forms: [bourgade]}
+          - {tag: hamlet, fr: hameau, src: E}
+          - {tag: district, fr: quartier, src: E, exclude: ['quartiers? généra(?:l|ux)']}
+          - {tag: housing estate, fr: lotissement, src: E}
+          - {tag: industrial zone, fr: zone industrielle, src: E, pos: expr}
+          - {tag: urbanisation, fr: urbanisation, src: E}
+          - {tag: road, fr: route, src: E, forms: [routier], exclude: ['en route', 'feuilles? de route', 'mises? en route', 'fausse route']}
+          - {tag: path, fr: chemin, src: E, exclude: ['mi-chemin', 'chemin faisant']}
+          - {tag: trail, fr: sentier, src: E}
+          - {tag: canal, fr: canal, src: E, plural: canaux, forms: [canalisation]}
+          - {tag: lock, fr: écluse, src: E, forms: [éclusier]}
+          - {tag: port, fr: port, src: E, forms: [portuaire],
+             exclude: ['port (?:du|d''|de la|des) ?(?:masque|casque|armes?|uniforme|costume|ceinture|voile)']}
+          - {tag: station, fr: gare, src: E}
+          - {tag: train, fr: train, src: E, exclude: ['en train de', 'trains? de vie', 'trains? de (?:mesures|réformes)']}
+          - {tag: airport, fr: aéroport, src: E, forms: [aéroportuaire]}
+
+  E:
+    label: Emotions
+    groups:
+      - name: Category name (rule I2)
+        entries:
+          - {tag: emotion, fr: émotion, src: G, forms: [émotionnel, émouvant, ému]}
+      - name: Emotions triggered (Koinos 4)
+        entries:
+          - {tag: calm, fr: calme, src: K, when: {context: feeling, else: C}, forms: [calmement]}
+          - {tag: comfort, fr: confort, src: K, forms: [confortable]}
+          - {tag: happy, fr: bonheur, src: K}
+          - {tag: excited, fr: enthousiasme, src: K, forms: [enthousiaste]}
+          - {tag: inspired, fr: inspiration, src: K, verb: inspirer, forms: [inspirant]}
+          - {tag: surprised, fr: surprise, src: K, forms: [surprenant]}
+          - {tag: nostalgia, fr: nostalgie, src: K, forms: [nostalgique]}
+      - name: Extension
+        entries:
+          - {tag: pleasure, fr: plaisir, src: E}
+          - {tag: pride, fr: fierté, src: E, forms: [fier, fière]}
+          - {tag: attachment, fr: attachement, src: E}
+          - {tag: admiration, fr: admiration, src: E, verb: admirer, forms: [admiratif, admirateur]}
+          - {tag: wonder, fr: émerveillement, src: E, verb: émerveiller}
+          - {tag: boredom, fr: ennui, src: E, forms: [ennuyeux, ennuyer]}
+          - {tag: stress, fr: stress, src: E, pos: inv, forms: [stressant, stressé]}
+          - {tag: fear, fr: peur, src: E, forms: [peureux, apeuré]}
+          - {tag: anxiety, fr: angoisse, src: E, forms: [angoissant, angoissé]}
+          - {tag: sadness, fr: tristesse, src: E, forms: [triste]}
+          - {tag: melancholy, fr: mélancolie, src: E, forms: [mélancolique]}
+          - {tag: anger, fr: colère, src: E, forms: [coléreux]}
+          - {tag: frustration, fr: frustration, src: E, forms: [frustrant, frustré]}
+          - {tag: disappointment, fr: déception, src: E, forms: [décevant, déçu]}
+          - {tag: loneliness, fr: solitude, src: E, forms: [solitaire]}
+          - {tag: disgust, fr: dégoût, src: E, forms: [dégoûtant, dégoûté]}
+
+  A:
+    label: Actions
+    groups:
+      - name: Category name (rule I2)
+        entries:
+          - {tag: action, fr: action, src: G,
+             exclude: ['actions? en justice', 'plans? d''action', 'champ d''action', 'rayon d''action', 'moyens? d''action']}
+      - name: Actions triggered (Koinos 5)
+        entries:
+          - {tag: working out, fr: faire du sport, src: K, pos: expr}
+          - {tag: jogging, fr: jogging, src: K}
+          - {tag: running, fr: courir, src: K, pos: v,
+             conj: [courent, courait, couraient, courut, coururent, courra, courront, courrait, couru, courue, courus],
+             forms: [course, coureur]}
+          - {tag: seating (sitting), fr: s’asseoir, src: K, pos: v, require: reflexive,
+             conj: [assied, assieds, asseyent, asseyait, asseyaient, asseyant, assoit, assoient, assoyait, assit, assirent]}
+          - {tag: laying down, fr: s’allonger, src: K, pos: v, require: reflexive}
+          - {tag: taking pictures, fr: photographier, src: K, pos: v, drop: [photographie, photographies]}
+          - {tag: taking selfies, fr: selfie, src: K}
+          - {tag: eating, fr: manger, src: K, pos: v}
+          - {tag: drinking, fr: boire, src: K, pos: v, conj: [boit, boivent, buvait, buvaient, buvant, buvons, buvez], forms: [buveur]}
+          - {tag: shopping, fr: shopping, src: K}
+          - {tag: biking, fr: faire du vélo, src: K, pos: expr}
+          - {tag: skating, fr: patiner, src: K, pos: v, forms: [patinage, patinoire, patineur]}
+          - {tag: driving, fr: conduire, src: K, pos: v,
+             conj: [conduisent, conduisait, conduisaient, conduisit, conduisirent, conduira, conduiront], forms: [conducteur, conductrice]}
+          - {tag: walking, fr: marcher, src: K, pos: v, drop: [marché, marchée, marchés, marchées], forms: [marche, marcheur],
+             exclude: ['en marche', 'marche à suivre']}
+          - {tag: working, fr: travailler, src: K, pos: v, forms: [travail, travaux, travailleur]}
+          - {tag: thinking, fr: réfléchir, src: K, pos: v,
+             conj: [réfléchit, réfléchissent, réfléchissait, réfléchissaient, réfléchissant, réfléchi, réfléchie, réfléchis]}
+          - {tag: calling, fr: téléphoner, src: K, pos: v}
+          - {tag: smoking, fr: fumer, src: K, pos: v, drop: [fumé, fumée, fumés, fumées], forms: [fumeur]}
+          - {tag: playing, fr: jouer, src: K, pos: v, forms: [joueur],
+             exclude: ['jou\w* (?:un |le |des |une |d''un )?(?:\w+ )?rôles?']}
+          - {tag: dancing, fr: danser, src: K, pos: v, forms: [danse, danseur, danseuse, dansant]}
+      - name: Extension
+        entries:
+          - {tag: visiting, fr: visiter, src: E, pos: v, forms: [visite, visiteur, visitable]}
+          - {tag: discovering, fr: découvrir, src: E, pos: v,
+             conj: [découvre, découvrent, découvrait, découvraient, découvrant, découvrit, découvrirent, découvrira,
+                    découvert, découverte, découverts, découvertes], forms: [découvreur]}
+          - {tag: strolling, fr: se promener, src: E, pos: v, require: reflexive,
+             conj: [promène, promènes, promènent, promènera, promèneront, promènerait, promèneraient], forms: [promeneur]}
+          - {tag: hiking, fr: randonner, src: E, pos: v, forms: [randonnée, randonneur]}
+          - {tag: swimming, fr: se baigner, src: E, pos: v, require: reflexive, forms: [baignade, baigneur]}
+          - {tag: fishing, fr: pêcher, src: E, pos: v, forms: [pêcheur, pêcherie]}
+          - {tag: hunting, fr: chasser, src: E, pos: v, forms: [chasseur]}
+          - {tag: climbing, fr: escalader, src: E, pos: v, forms: [escalade]}
+          - {tag: skiing, fr: skier, src: E, pos: v, forms: [ski, skieur, skiable]}
+          - {tag: sailing, fr: naviguer, src: E, pos: v, forms: [navigation, navigable, navigateur]}
+          - {tag: camping, fr: camper, src: E, pos: v, forms: [campeur, camping, campement]}
+          - {tag: picnicking, fr: pique-niquer, src: E, pos: v, forms: [pique-nique]}
+          - {tag: gathering, fr: se rassembler, src: E, pos: v, require: reflexive, forms: [rassemblement]}
+          - {tag: celebrating, fr: célébrer, src: E, pos: v, drop: [célèbre, célèbres], conj: [célèbrent], forms: [célébration]}
+          - {tag: attending a show, fr: assister, src: E, pos: v, drop: [assistant]}
+          - {tag: praying, fr: prier, src: E, pos: v, forms: [prière]}
+          - {tag: contemplating, fr: contempler, src: E, pos: v, forms: [contemplation, contemplatif]}
+          - {tag: resting, fr: se reposer, src: E, pos: v, require: reflexive, forms: [repos]}
+          - {tag: gardening, fr: jardiner, src: E, pos: v, forms: [jardinage]}
+          - {tag: farming, fr: cultiver, src: E, pos: v, forms: [cultivable, cultivateur]}
+
+  R:
+    label: Reflections
+    groups:
+      - name: Category names (rule I2)
+        entries:
+          - {tag: reflection, fr: réflexion, src: G}
+          - {tag: idea, fr: idée, src: G}
+      - name: "Proposal: Koinos 6 \"ideas\" is free text, the thesis gives no list (p. 537)"
+        entries:
+          - {tag: to think, fr: penser, src: P, pos: v, forms: [pensée, penseur]}
+          - {tag: to believe, fr: croire, src: P, pos: v,
+             conj: [crois, croit, croient, croyons, croyez, croyait, croyaient, croyant, croira, croiront], forms: [croyance]}
+          - {tag: to consider, fr: considérer, src: P, pos: v, conj: [considère, considèrent], forms: [considération]}
+          - {tag: to judge, fr: juger, src: P, pos: v, forms: [jugement]}
+          - {tag: opinion, fr: opinion, src: P}
+          - {tag: renowned, fr: réputé, src: P, pos: adj, forms: [réputation]}
+          - {tag: famous, fr: célèbre, src: P, forms: [célébrité]}
+          - {tag: nickname, fr: surnom, src: P, verb: surnommer}
+          - {tag: symbol, fr: symbole, src: P, verb: symboliser, forms: [symbolique, symbolisme]}
+          - {tag: emblem, fr: emblème, src: P, forms: [emblématique]}
+          - {tag: to evoke, fr: évoquer, src: P, pos: v, forms: [évocation, évocateur, évocatrice]}
+          - {tag: imaginary, fr: imaginaire, src: P, forms: [imagination]}
+          - {tag: criticism, fr: critique, src: P, verb: critiquer}
+          - {tag: controversy, fr: controverse, src: P, forms: [controversé]}
+          - {tag: debate, fr: débat, src: P, forms: [débattre, débattu, débattent, débattait, débattaient]}
+          - {tag: project, fr: projet, src: P}
+          - {tag: proposal, fr: proposition, src: P, verb: proposer}
+          - {tag: wish, fr: souhait, src: P, verb: souhaiter, forms: [souhaitable]}
+          - {tag: aspiration, fr: aspiration, src: P}
+          - {tag: vision, fr: vision, src: P}
