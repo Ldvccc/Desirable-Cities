@@ -80,6 +80,11 @@ FAIRE = r"(?:faire|fais|fait|faisons|faites|font|faisait|faisaient|faisant|fera|
 ER_ENDINGS = ("er", "e", "es", "ent", "ons", "ez", "ais", "ait", "aient", "ions", "iez", "a", "as", "âmes", "âtes",
               "èrent", "ai", "erai", "eras", "era", "erons", "erez", "eront", "erais", "erait", "erions", "eriez",
               "eraient", "ant", "é", "ée", "és", "ées")
+# List option `encoding: {third_person_only: true}` (list v4): encyclopedic text
+# uses the third person, and the other persons are often other words
+# (joues = cheeks, pensions = pensions).
+ER_ENDINGS_THIRD = ("er", "e", "ent", "ait", "aient", "a", "èrent", "era", "eront", "erait", "eraient",
+                    "ant", "é", "ée", "és", "ées")
 
 
 # --- the list ----------------------------------------------------------------
@@ -141,11 +146,11 @@ def inflect_adj(word: str) -> set:
     return f
 
 
-def conjugate_er(infinitive: str) -> set:
+def conjugate_er(infinitive: str, third_person_only: bool = False) -> set:
     """Conjugated forms of a regular -er verb (manger -> mangeait, mangé...)."""
     stem = infinitive[:-2]
     out = set()
-    for ending in ER_ENDINGS:
+    for ending in (ER_ENDINGS_THIRD if third_person_only else ER_ENDINGS):
         s = stem
         if stem.endswith("g") and ending[0] in "aâo":
             s = stem + "e"
@@ -160,14 +165,14 @@ def bare_verb(fr: str) -> str:
     return re.sub(r"^(?:se\s+|s['’])", "", fr)
 
 
-def surface_forms(entry: dict) -> dict:
+def surface_forms(entry: dict, third_person_only: bool = False) -> dict:
     """{kind: set of words} for a single-word entry or a verb."""
     pos, fr = entry["pos"], entry["fr"]
     drop = set(entry.get("drop", []))
     kinds = {"lemma": set(), "conj": set(), "form": set()}
     if pos == "v":
         inf = bare_verb(fr)
-        kinds["conj"] = ({inf} | (conjugate_er(inf) if inf.endswith("er") else set())
+        kinds["conj"] = ({inf} | (conjugate_er(inf, third_person_only) if inf.endswith("er") else set())
                          | set(entry.get("conj", [])))
     elif pos == "adj":
         kinds["lemma"] = inflect_adj(fr)
@@ -176,7 +181,7 @@ def surface_forms(entry: dict) -> dict:
     else:
         kinds["lemma"] = {fr} | inflect_noun(entry.get("lemma", fr), entry.get("plural"))
     if entry.get("verb"):
-        kinds["conj"] |= conjugate_er(entry["verb"])
+        kinds["conj"] |= conjugate_er(entry["verb"], third_person_only)
     for form in entry.get("forms", []):
         kinds["form"] |= inflect_adj(form)
     return {k: {w for w in v if w not in drop} for k, v in kinds.items()}
@@ -218,7 +223,8 @@ def bounded(body: str, flags=re.IGNORECASE) -> re.Pattern:
 
 
 def exclusion_regex(pattern: str) -> re.Pattern:
-    body = pattern.replace("'", APOS).replace(" ", r"\s+")
+    """' ' = one or more spaces, ' ?' = optional spaces, ' = ' or ’."""
+    body = pattern.replace("'", APOS).replace(" ?", "\0").replace(" ", r"\s+").replace("\0", r"\s*")
     return bounded(body)
 
 
@@ -266,6 +272,7 @@ def build_matchers(kw: dict, method: str = "a_form") -> list:
                                  "require": None, "exclude": [], "when": None})
         return matchers
 
+    third_person_only = bool((kw.get("encoding") or {}).get("third_person_only"))
     for e in merge_duplicates(entries):
         exclude = [exclusion_regex(p) for p in e.get("exclude", [])]
         flags = 0 if e.get("case") == "exact" else re.IGNORECASE
@@ -277,7 +284,7 @@ def build_matchers(kw: dict, method: str = "a_form") -> list:
             matchers.append({**base, "kind": "lemma", "pattern": bounded(expr_regex(e["fr"]), flags),
                              "require": None})
             continue
-        for kind, words in surface_forms(e).items():
+        for kind, words in surface_forms(e, third_person_only).items():
             if not words:
                 continue
             require = e.get("require")
