@@ -56,27 +56,38 @@ def links(pid) -> set:
 def pid_matrix(spans: pd.DataFrame, n_sentences: int) -> dict:
     """Sentence-level PID matrix of one article.
 
-    spans: one row per span with sentence_id, code, pid, entry.
+    spans: one row per span with sentence_id, code, pid, entry; optional
+    column `inherited` ('N:parc;B:quai', method heritage): environments of
+    the previous sentence a response is linked to.
     Returns {n_sentences, spans, cells, env_sentences, response_sentences,
-    env_only_sentences, linked_sentences, unlinked_sentences};
-    cells[(row, col)] = {sentences, response: Counter, environment: Counter}
-    for row in N, C, B, '-' and col in E, A, R, '-'."""
+    env_only_sentences, linked_sentences, unlinked_sentences,
+    inherited_sentences}; cells[(row, col)] = {sentences, response: Counter,
+    environment: Counter} for row in N, C, B, '-' and col in E, A, R, '-'.
+    An inherited link counts in the cell; its environment words are those of
+    the previous sentence. The sentence's own profile (env_sentences) does not
+    include them."""
+    from heritage import parse_inherited
+
     cells = {(r, c): {"sentences": 0, "response": Counter(), "environment": Counter()} for r in ROWS for c in COLS}
     env_sentences, response_sentences, covered = Counter(), Counter(), 0
-    env_only = linked = unlinked = 0
+    env_only = linked = unlinked = inherited_n = 0
+    inherited_col = spans["inherited"] if "inherited" in spans else [None] * len(spans)
+    spans = spans.assign(_inherited=list(inherited_col))
     for _, g in spans.groupby("sentence_id", sort=False):
         covered += 1
-        envs = {}
+        envs, inherited = {}, {}
         responses = []
-        for code, entry, pid in zip(g["code"], g["entry"], g["pid"]):
+        for code, entry, pid, inh in zip(g["code"], g["entry"], g["pid"], g["_inherited"]):
             entry = SHORT.get(entry, entry)
             if code in ENVS:
                 envs.setdefault(code, []).append(entry)
             elif code in RESPONSES:
                 responses.append((code, entry, links(pid)))
+                for c, words in parse_inherited(inh).items():
+                    inherited.setdefault(c, set()).update(words)
         present = set()
         for code, entry, targets in responses:
-            for env in (targets & envs.keys()) or {NONE}:
+            for env in (targets & (envs.keys() | inherited.keys())) or {NONE}:
                 present.add((env, code))
                 cells[(env, code)]["response"][entry] += 1
         if not responses:
@@ -84,16 +95,37 @@ def pid_matrix(spans: pd.DataFrame, n_sentences: int) -> dict:
         for env, code in present:
             cells[(env, code)]["sentences"] += 1
             if env != NONE:
-                cells[(env, code)]["environment"].update(envs[env])
+                cells[(env, code)]["environment"].update(envs[env] if env in envs else sorted(inherited[env]))
         env_sentences.update(envs.keys())
         response_sentences.update({code for code, _, _ in responses})
         env_only += bool(envs) and not responses
         linked += any(env != NONE and code != NONE for env, code in present)
         unlinked += any(env == NONE for env, _ in present)
+        inherited_n += any(env in inherited and env not in envs for env, _ in present)
     cells[(NONE, NONE)]["sentences"] = n_sentences - covered
     return {"n_sentences": n_sentences, "spans": len(spans), "cells": cells, "env_sentences": env_sentences,
             "response_sentences": response_sentences, "env_only_sentences": env_only,
-            "linked_sentences": linked, "unlinked_sentences": unlinked}
+            "linked_sentences": linked, "unlinked_sentences": unlinked, "inherited_sentences": inherited_n}
+
+
+def cell_set(spans: pd.DataFrame) -> set:
+    """PID cells of each sentence: {(sentence_id, environment, response)},
+    the unit of the PID-level comparison (paper §5.4: F1 per PID cell at
+    sentence level). Inherited links count like the others."""
+    from heritage import parse_inherited
+
+    out = set()
+    inherited_col = spans["inherited"] if "inherited" in spans else [None] * len(spans)
+    rows = list(zip(spans["sentence_id"], spans["code"], spans["pid"], inherited_col))
+    envs = {}
+    for sid, code, _, _ in rows:
+        if code in ENVS:
+            envs.setdefault(sid, set()).add(code)
+    for sid, code, pid, inh in rows:
+        if code in RESPONSES:
+            allowed = envs.get(sid, set()) | set(parse_inherited(inh))
+            out |= {(sid, env, code) for env in links(pid) & allowed}
+    return out
 
 
 def keywords(counter: Counter, k: int = None) -> str:
@@ -303,7 +335,7 @@ def write_pdf(path: Path, blocks: list, summary: list, comparison: tuple, notes:
          ("BOX", (2, 0), (steps + 1, 0), 0.4, rule)]
         + [("BACKGROUND", (2 + i, 0), (2 + i, 0), shade(SCALE_MAX * i / (steps - 1))) for i in range(steps)]))
 
-    story = [Paragraph("PID matrices of Courchaton and Lyon", st["title"]),
+    story = [Paragraph(notes.get("title", "PID matrices"), st["title"]),
              Paragraph(notes["subtitle"], st["sub"]), Spacer(1, 6)]
     for text in notes["intro"]:
         story += [Paragraph(text, st["body"]), Spacer(1, 3)]
@@ -327,104 +359,127 @@ def write_pdf(path: Path, blocks: list, summary: list, comparison: tuple, notes:
                                    matrix_table(m), Spacer(1, 3), legend_row, Spacer(1, 10)]))
 
     labels, values = comparison                      # labels: [(group, column label)]
-    story += [PageBreak(), Paragraph("All methods and both lists: sentences per cell", st["h"]),
-              Paragraph(notes["comparison"], st["body"]), Spacer(1, 5)]
+    story += [PageBreak(), Paragraph("All methods: sentences per cell", st["h"]),
+              Paragraph(notes["comparison"], st["body"]),
+              Paragraph(notes["comparison_note"] + " Ref. = human reference; A-f. = A-form; Her. = Heritage; "
+                        "Hyb. = Hybrid; H+H = Hybrid + Heritage.",
+                        st["note"]), Spacer(1, 5)]
     groups = list(dict.fromkeys(g for g, _ in labels))
     centred = ParagraphStyle("hc", parent=st["hdr"], alignment=1)
-    data = [["Cell"] + [""] * len(labels), [""] + [Paragraph(f"<b>{l}</b>", centred) for _, l in labels]]
-    shaded = [("BACKGROUND", (0, 1), (-1, 1), head), ("FONTNAME", (0, 1), (-1, 1), bold),
-              ("SPAN", (0, 0), (0, 1)), ("VALIGN", (0, 0), (0, 1), "BOTTOM")]
+    cells = [(env, resp) for env in ROWS for resp in COLS if not (env == NONE and resp == NONE)]
+    # one table per article, side by side two by two: rows = cells, columns = methods
+    # one table per article, all side by side: rows = cells, columns = methods (abbreviated)
+    short = {"Ref.": "Ref.", "A-form": "A-f.", "Heritage": "Her.", "Hybrid": "Hyb.", "Hybrid + Heritage": "H+H"}
+    label_w, gap = 2.45, 0.2
+    n_cols = len(labels)
+    width = min(1.6, (26.9 - len(groups) * (label_w + gap)) / n_cols)
+    tables, slots = [], []
     for g in groups:
-        first = 1 + [x for x, _ in labels].index(g)
-        last = first + sum(1 for x, _ in labels if x == g) - 1
-        data[0][first] = g
-        shaded += [("SPAN", (first, 0), (last, 0)), ("LINEBEFORE", (first, 0), (first, -1), 1.2, ink)]
-    for env in ROWS:
-        for resp in COLS:
-            if env == NONE and resp == NONE:
-                continue
+        cols = [i for i, (x, _) in enumerate(labels) if x == g]
+        data = [[Paragraph(f"<b>{g}</b>", st["hdr"])]
+                + [Paragraph(f"<b>{short.get(labels[i][1], labels[i][1])}</b>", centred) for i in cols]]
+        shaded = [("TOPPADDING", (0, 0), (-1, -1), 0.9), ("BOTTOMPADDING", (0, 0), (-1, -1), 1.1),
+                  ("LEFTPADDING", (0, 0), (-1, -1), 2), ("RIGHTPADDING", (0, 0), (-1, -1), 2)]
+        for env, resp in cells:
             name = (f"{env} × {resp}" if NONE not in (env, resp) else
-                    f"{env} only" if resp == NONE else f"{resp}, no environment")
-            data.append([name] + values[(env, resp)])
+                    f"{env} only" if resp == NONE else f"{resp}, no env.")
+            data.append([name] + [values[(env, resp)][i] for i in cols])
             if NONE in (env, resp):
                 shaded.append(("BACKGROUND", (0, len(data) - 1), (-1, len(data) - 1), margin_bg))
-    story.append(simple_table(data, [3.2] + [2.1] * len(labels), extra=shaded))
-    story += [Spacer(1, 3), Paragraph(notes["comparison_note"], st["note"])]
+        tables.append(simple_table(data, [label_w] + [width] * len(cols), extra=shaded))
+        slots.append((label_w + width * len(cols) + gap) * cm)
+    row = Table([tables], colWidths=slots, hAlign="LEFT")
+    row.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                             ("RIGHTPADDING", (0, 0), (-1, -1), 0)]))
+    story += [row, Spacer(1, 5)]
 
     doc = SimpleDocTemplate(str(path), pagesize=landscape(A4), leftMargin=1.4 * cm, rightMargin=1.4 * cm,
-                            topMargin=1.2 * cm, bottomMargin=1.2 * cm, title="PID matrices of Courchaton and Lyon",
+                            topMargin=1.2 * cm, bottomMargin=1.2 * cm, title=notes.get("title", "PID matrices"),
                             author="Desirable Cities (UTSEUS EG01)")
-    doc.build(story)
+    try:
+        doc.build(story)
+    except PermissionError:
+        sys.exit(f"cannot write {path}: the file is open in another program (PDF viewer). Close it and run again.")
 
 
 # --- pilot report ---------------------------------------------------------------------
 
-def pilot_report(out: Path = OUT) -> None:
+def pilot_report(out: Path = OUT, judge=None, workers: int = 4, hybrid_label: str = "") -> None:
+    """Matrices of the pilot articles for every method (list v3; the CSV also
+    has list v4). `judge`: the LLM of the Hybrid method (hybrid.make_judge);
+    without one, or without its answers, Hybrid is left out."""
     import compare_coders as cc
     import compare_list_versions as clv
+    import compare_methods as cm
 
-    labels = cc.METHOD_LABELS
     lists = {lab: kc.load_list(p) for lab, p in clv.LISTS.items()}
-    articles = {"Courchaton": cc.load_sentences(cc.ARTICLE, "70178"), "Lyon": cc.load_sentences(clv.LYON, "69123")}
-    revisions = {"Courchaton": "234797520", "Lyon": "241583218"}
+    articles = cm.load_articles()
+    revisions = cm.REVISIONS
+    reference = "Human reference (A or B)"
 
-    matrices, rows = {}, []
+    matrices, rows, missing = {}, [], ""
     for article, sentences in articles.items():
         n = len(sentences)
         coders = []
-        if article == "Courchaton":
-            ref = reference_spans(cc.load_reference(cc.REFERENCE, sentences))
-            coders.append(("reference", "Human reference (A or B)", "v3", ref))
-        runs = clv.run(sentences, lists)
-        for lab in lists:
-            for method in kc.METHODS:
-                coders.append((method, labels[method], lab, runs[(lab, method)][0]))
-        for key, name, lab, spans in coders:
+        if "reference" in cm.ARTICLES[article]:
+            ref = cc.load_reference(cm.ARTICLES[article]["reference"], sentences)
+            coders.append((reference, "v3", reference_spans(ref)))
+        for lab, kw in lists.items():
+            runs, _, _, note = cm.run_all(sentences, kw, judge if lab == "v3" else None, workers)
+            missing = missing or (note if lab == "v3" else "")
+            coders += [(label, lab, spans) for label, spans in runs.items()]
+        for name, lab, spans in coders:
             m = pid_matrix(spans, n)
             share = koinos_share(spans, lists[lab])
-            matrices[(article, key, lab)] = (name, m, share)
+            matrices[(article, name, lab)] = (m, share)
             rows += matrix_rows(m, article=article, revision=revisions[article], coder=name, list=lab)
+    if any(matrices[(a, "A", "v3")][0]["cells"] != matrices[(a, "A", "v4")][0]["cells"] for a in articles):
+        raise RuntimeError("method A should not depend on the list version (same Koinos tags in v3 and v4)")
 
+    method_text = {
+        reference: "Union of the two human coders (rules v2, list v3); links given by the coders (R>N).",
+        "A": "Koinos tags only, naive matching; every response linked to every environment of its sentence.",
+        "A+": "Full list v3, naive matching; same links as A.",
+        "A-form": "List v3 + rules v2 (forms, homonyms, proper names); links by rule D7. Rule D4/D6 (people really "
+                  "feel, act, think) is not applied.",
+        "Heritage": "A-form, and a response with no environment in its sentence inherits those of the previous "
+                    "sentence when its sentence refers back (y, là, celui-ci, Il/Elle…).",
+        "Hybrid": f"A-form, with every response checked by an LLM (D4, D6) and linked by it (D7): {hybrid_label}.",
+        "Hybrid + Heritage": "Hybrid, then inheritance as in Heritage.",
+    }
+    order = [reference] + cm.METHODS
     summary = [["Article", "Coder", "Spans", "Koinos", "N", "C", "B", "E", "A", "R", "Env., no resp.",
                 "PID cell", "Resp., no env."]]
     blocks = []
-    for (article, key, lab), (name, m, share) in matrices.items():
-        if lab != "v3":
-            continue
-        p = profile(m)
-        summary.append([article, name, m["spans"], "–" if share != share else f"{100 * share:.0f} %"]
-                       + [f"{100 * p[c]:.0f} %" for c in ENVS] + [f"{100 * p[c]:.1f} %" for c in RESPONSES]
-                       + [f"{100 * p['env_only']:.0f} %", f"{100 * p['linked']:.1f} %",
-                          f"{100 * p['unlinked']:.1f} %"])
-        method_text = {
-            "reference": "Union of the two human coders (rules v2, list v3); links given by the coders (R>N).",
-            "a": "Algorithm A: Koinos tags only, naive matching; every response linked to every environment of its "
-                 "sentence.",
-            "a_plus": "Algorithm A+: full list v3, naive matching; same links as A.",
-            "a_form": "Algorithm A-form: list v3 + rules v2 (forms, homonyms, proper names); links by rule D7. "
-                      "Rule D4/D6 (people really feel, act, think) is not applied.",
-        }[key]
-        sub = (f"fr.wikipedia rev. {revisions[article]} · {m['n_sentences']} sentences · {m['spans']} spans · "
-               f"{method_text}")
-        blocks.append((f"{article} · {name}", sub, m))
-
-    columns = [("Courchaton", "reference", "v3", "Reference")]
     for article in articles:
-        for key, lab in (("a", "v3"), ("a_plus", "v3"), ("a_form", "v3"), ("a_plus", "v4"), ("a_form", "v4")):
-            columns.append((article, key, lab, labels[key] + ("" if key == "a" else f" {lab}")))
+        for name in order:
+            if (article, name, "v3") not in matrices:
+                continue
+            m, share = matrices[(article, name, "v3")]
+            p = profile(m)
+            summary.append([article, name, m["spans"], "–" if share != share else f"{100 * share:.0f} %"]
+                           + [f"{100 * p[c]:.0f} %" for c in ENVS] + [f"{100 * p[c]:.1f} %" for c in RESPONSES]
+                           + [f"{100 * p['env_only']:.0f} %", f"{100 * p['linked']:.1f} %",
+                              f"{100 * p['unlinked']:.1f} %"])
+            sub = (f"fr.wikipedia rev. {revisions[article]} · {m['n_sentences']} sentences · {m['spans']} spans · "
+                   f"{method_text[name]}")
+            blocks.append((f"{article} · {name}", sub, m))
+
+    columns = [(a, name, "v3", "Ref." if name == reference else name)
+               for a in articles for name in order if (a, name, "v3") in matrices]
     values = {}
     for env in ROWS:
         for resp in COLS:
-            values[(env, resp)] = [matrices[(a, k, l)][1]["cells"][(env, resp)]["sentences"] for a, k, l, _ in columns]
-    if any(matrices[(a, "a", "v3")][1]["cells"] != matrices[(a, "a", "v4")][1]["cells"] for a in articles):
-        raise RuntimeError("method A should not depend on the list version (same Koinos tags in v3 and v4)")
+            values[(env, resp)] = [matrices[(a, k, l)][0]["cells"][(env, resp)]["sentences"] for a, k, l, _ in columns]
 
     review = pd.read_csv(clv.REVIEW)
     resp_review = review[review["code"].isin(RESPONSES)]
+    hybrid_ran = ("Lyon", "Hybrid", "v3") in matrices
     notes = {
-        "subtitle": f"Keyword list v3 · rules for manual coding v2 · Courchaton rev. 234797520 ({len(articles['Courchaton'])} "
-                    f"sentences) · Lyon rev. 241583218 ({len(articles['Lyon'])} sentences) · "
-                    f"{date.today().strftime('%d %B %Y').lstrip('0')}",
+        "title": "PID matrices of " + ", ".join(articles),
+        "subtitle": "Keyword list v3 · rules for manual coding v2 · "
+                    + " · ".join(f"{a} rev. {revisions[a]} ({len(s)} sentences)" for a, s in articles.items())
+                    + f" · {date.today().strftime('%d %B %Y').lstrip('0')}",
         "intro": [
             "The framework crosses the three <b>environments</b> (N natural, C cultural, B constructural) with the "
             "three <b>responses</b> (E emotions, A actions, R reflections); each crossing is a <b>PID cell</b>. As in "
@@ -435,40 +490,41 @@ def pilot_report(out: Path = OUT) -> None:
             "Two margins complete the 3 × 3 matrix: <b>No response</b> (sentences with that environment and no "
             "response at all, i.e. pure description) and <b>No environment</b> (responses linked to no environment). "
             "Row and column headers give the share of sentences with each environment and each response. One matrix "
-            "per article and per coder follows, with list v3; the last page compares all methods with lists v3 and v4.",
+            "per article and per method follows, with list v3; the last page compares them all. "
+            "docs/pid_matrices.csv also has every method with list v4.",
         ],
         "summary": "Share of the sentences of the article that contain at least one span of each code. Koinos = share "
                    "of spans whose list entry is a Koinos tag (paper, §6.4). Env., no resp. = sentences with an "
                    "environment and no response; PID cell = sentences with a response linked to an environment; "
                    "Resp., no env. = sentences with a response linked to no environment.",
         "caution": [
-            f"<b>How far to trust the response cells.</b> No algorithm applies rule D4/D6 (an emotion or action counts "
-            f"only when people experience it, a reflection only when the text reports what people think of the place): "
-            f"responses are matched on their form only, and linked to every environment of their sentence. In the "
-            f"Lyon review sample, {int(resp_review['valid'].sum())} of the {len(resp_review)} response spans were "
-            f"valid (environments: {int(review[review['code'].isin(ENVS)]['valid'].sum())} of "
-            f"{int(review['code'].isin(ENVS).sum())}). The nine PID cells of the algorithms are therefore an upper "
-            f"bound, mostly made of false responses (célèbre for a person, projet, proposer); the environment profile "
-            f"is much more reliable. The Courchaton reference, which contains a single response, shows what the "
-            f"human coding gives.",
-            "Lyon has no human coding yet (its coders work on rev. 241194072 of 9 November, three small edits "
-            "before the revision used here). Courchaton is development data: the rules were refined on it.",
+            f"<b>How far to trust the response cells.</b> A, A+, A-form and Heritage do not apply rule D4/D6 (an "
+            f"emotion or action counts only when people experience it, a reflection only when the text reports what "
+            f"people think of the place): their responses are matched on their form only. In the Lyon review sample, "
+            f"{int(resp_review['valid'].sum())} of the {len(resp_review)} response spans were valid (environments: "
+            f"{int(review[review['code'].isin(ENVS)]['valid'].sum())} of {int(review['code'].isin(ENVS).sum())}). "
+            + (f"The Hybrid method checks every response with an LLM ({hybrid_label}): its cells are the "
+               "closest to the rules, but they are not yet measured against a human coding." if hybrid_ran else
+               f"The Hybrid method (LLM check) is not in this report: {missing or 'no LLM judge given'}."),
+            "Lyon and Fontainebleau have no human coding (the Lyon coders work on rev. 241194072 of 9 November, "
+            "three small edits before the revision used here). Courchaton is development data: the rules were "
+            "refined on it.",
         ],
-        "comparison": "Number of sentences containing each cell, for every coder and both lists (A is the same with "
-                      "both lists: the Koinos tags did not change). List v4 is a proposal built from these two "
-                      "articles, so its figures here are not a test.",
+        "comparison": "Number of sentences containing each cell, for every method (list v3).",
         "comparison_note": "N only, C only, B only = sentences with that environment and no response; "
                            "E/A/R, no environment = responses linked to no environment. Every cell of every matrix, "
-                           "with its keywords, is in docs/pid_matrices.csv.",
+                           "with its keywords, for lists v3 and v4, is in docs/pid_matrices.csv.",
     }
     out.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(rows).to_csv(out.with_suffix(".csv"), index=False, encoding="utf-8-sig")
     write_pdf(out.with_suffix(".pdf"), blocks, summary, ([(c[0], c[3]) for c in columns], values), notes)
     print(f"-> {out}.pdf / .csv")
-    for (article, key, lab), (name, m, share) in matrices.items():
+    for (article, name, lab), (m, _) in matrices.items():
+        if lab != "v3":
+            continue
         core = {f"{e}x{r}": m["cells"][(e, r)]["sentences"] for e in ENVS for r in RESPONSES}
-        print(f"  {article:<10} {lab} {name:<26} sentences {m['n_sentences']:>4}  PID cells {m['linked_sentences']:>3}"
-              f"  " + " ".join(f"{k}={v}" for k, v in core.items() if v))
+        print(f"  {article:<10} {name:<26} PID sentences {m['linked_sentences']:>3}  "
+              + " ".join(f"{k}={v}" for k, v in core.items() if v))
 
 
 # --- CLI ------------------------------------------------------------------------------
@@ -479,9 +535,16 @@ def main() -> None:
     ap.add_argument("--spans", help="spans CSV written by keyword_coder.py (corpus mode)")
     ap.add_argument("--sentences", help="sentences parquet the spans come from (corpus mode)")
     ap.add_argument("--out", help="output CSV (corpus mode) or report path without extension (pilot mode)")
+    ap.add_argument("--model", default=None, help="pilot mode: LLM of the Hybrid method (default: hybrid.MODEL)")
+    ap.add_argument("--offline", action="store_true", help="pilot mode: Hybrid uses cached answers only")
+    ap.add_argument("--no-hybrid", action="store_true", help="pilot mode: leave the Hybrid method out")
     args = ap.parse_args()
     if not args.spans and not args.sentences:
-        pilot_report(Path(args.out) if args.out else OUT)
+        import hybrid
+
+        judge = None if args.no_hybrid else hybrid.make_judge(args.model or hybrid.MODEL, offline=args.offline)
+        label = "" if judge is None else f"{judge.model}, prompt {hybrid.PROMPT_VERSION}"
+        pilot_report(Path(args.out) if args.out else OUT, judge=judge, hybrid_label=label)
         return
     if not (args.spans and args.sentences):
         sys.exit("corpus mode needs both --spans and --sentences")

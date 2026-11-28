@@ -34,6 +34,7 @@ Questions of the paper (`Desirable_Cities_Utseus_Temporary_Paper`, draft of 17 N
 | 19 Nov | Courchaton coded by two humans and by an AI; list v3 and rules v2 encoded; methods A, A+, A-form; comparison | `src/keyword_coder.py`, `src/compare_coders.py`, `docs/courchaton_comparison.pdf` |
 | 24 Nov | Lyon coded by the algorithms; list v4 (proposal); comparison of the list versions | `schema/keyword_list_v4.yaml`, `src/compare_list_versions.py`, `docs/list_versions_comparison.pdf` |
 | 25 Nov | PID matrices of the pilot articles; this summary; differences between the lists | `src/pid_matrix.py`, `docs/pid_matrices.pdf`, `docs/keyword_lists.md` |
+| 25 Nov | Methods Heritage (inherited links) and Hybrid (LLM check of the responses); comparison of the six methods; third article, Fontainebleau (no human coding) | `src/heritage.py`, `src/hybrid.py`, `src/compare_methods.py`, `docs/methods_comparison.pdf` |
 
 ## 3. Extraction: from the list of communes to sentences
 
@@ -130,9 +131,16 @@ kind`). They are in `src/keyword_coder.py`:
    conjugated form over a derived form, then the order of the list.
 5. **Links (D7).** Each E, A or R span is linked to every environment present in its sentence, or "0".
 
-**What no algorithm does.** Rules D4 and D6 (people really feel, act or think) need the meaning of the sentence. The
-algorithms code responses on their form only, so they over-count E, A and R and the PID cells built on them. This is
-the main limit of the keyword approach and the place where LLM annotators are expected to do better.
+**What the keyword methods do not do.** Rules D4 and D6 (people really feel, act or think) need the meaning of the
+sentence. A, A+ and A-form code responses on their form only, so they over-count E, A and R and the PID cells built
+on them. Two methods built on A-form address the limits of the matrix:
+
+| Method | What it changes | File |
+|---|---|---|
+| **Heritage** | A response with no environment in its sentence inherits the environments of the previous sentence (same section) when its sentence refers back to a place: *y* (not *il y a*), *là*, *celui-ci*, *ce lieu*…, or a sentence-initial *Il/Elle/Ils/Elles* that is not impersonal. Inherited links are flagged. | `src/heritage.py` |
+| **Hybrid** | Environments kept as A-form codes them. Every sentence with a response candidate is sent to an LLM (Claude Opus 5.5, structured JSON output) with the candidates, the environment words of the sentence, the previous sentence and rules D4, D6, D7. The LLM says whether each candidate is a real response and which environment words it relates to; invalid ones are dropped. It never adds a word, so the list stays closed. Answers are cached with the exact request (`data/llm/hybrid_answers.jsonl`). | `src/hybrid.py` |
+
+`Hybrid + Heritage` applies both. `python src/compare_methods.py` compares the six methods.
 
 **First algorithm A** (`src/classify_keywords.py`, 12 Nov): the same naive idea at the sentence level with lexicon
 v0. Kept for reference.
@@ -175,11 +183,47 @@ Precision was estimated on a random sample of 200 spans reviewed by Claude again
 measured without a full coding. Lyon was also used to build list v4, so the v4 figures are optimistic
 (`docs/list_versions_comparison.pdf`).
 
+### Heritage and Hybrid (list v3)
+
+`docs/methods_comparison.pdf`. Courchaton: every method built on A-form finds the 50 reference words and the single
+reference PID cell (*célèbre* R × N). Lyon and Fontainebleau (rev. 240633341, 391 sentences, 8,300 words, no human
+coding; it served earlier as a smoke test of A-form, so it is not entirely unseen):
+
+| Article | Method | Response spans | Sentences with a PID cell | PID cells (9 cells, in sentences) |
+|---|---|---|---|---|
+| Lyon | A-form | 184 | 125 | 176 |
+| Lyon | Heritage | 184 | 127 | 179 |
+| Lyon | Hybrid | 61 | 38 | 42 |
+| Lyon | Hybrid + Heritage | 61 | 40 | 45 |
+| Fontainebleau | A-form | 55 | 41 | 67 |
+| Fontainebleau | Heritage | 55 | 41 | 67 |
+| Fontainebleau | Hybrid | 38 | 23 | 28 |
+| Fontainebleau | Hybrid + Heritage | 38 | 23 | 28 |
+
+On Fontainebleau the Hybrid keeps a much larger share of the candidates (38 of 55, against 61 of 184 in Lyon): the
+article reports more real responses (royal hunts and climbing in the forest, visitors to the castle, the
+reputation of the forest), and its N × A and N × R cells stay filled (6 sentences each). Heritage adds nothing there:
+the only sentence that refers back (*Le comte d'Artois y fit courir…*) follows a sentence without environment word,
+and *Cette pratique, devenue emblématique* refers back with a word that is not a marker.
+
+- **Hybrid** keeps 61 of the 184 response candidates (E 4 of 9, A 32 of 82, R 25 of 93). It drops *projet* (32),
+  *proposer* (13), *danse* as an art form or a name (13), *action* (10)… and keeps nicknames (*surnommé*: the
+  Crayon, the ficelle, the petit Louvre), reputations (*réputé*, *célèbre* about the place) and real visitors and
+  dancers. It also narrows the links of 14 kept responses to the environment words they are about. Every
+  decision and its reason is in `docs/hybrid_audit_lyon.csv`.
+- **Heritage** changes little: 2 sentences of Lyon (the nicknames of the Part-Dieu towers, the visitors of the
+  basilica). Most unlinked responses are false ones whose sentence does not refer back to a place.
+- **These Hybrid figures are a preview.** No API key was available, so the LLM answers were written by Claude
+  (the same model) inside the Claude Code session, following the prompt of `hybrid.py`, and cached under the
+  model id `session:claude-opus-5-5`. They must be rerun through the API before being quoted. No human judgment
+  of the responses exists yet, so the precision of Hybrid on responses is not measured.
+
 ### PID matrices
 
-`python src/pid_matrix.py` → **`docs/pid_matrices.pdf`**: one 3 × 3 matrix per article and per coder (Courchaton:
-human reference, A, A+, A-form; Lyon: A, A+, A-form; list v3), with the keywords found in each cell. The last page
-compares all methods with lists v3 and v4. As in the paper (§5.2 c, Figure 2), a cell is counted in **sentences**: a
+`python src/compare_methods.py` (or `python src/pid_matrix.py`) → **`docs/pid_matrices.pdf`**: one 3 × 3 matrix per
+article and per method (Courchaton: human reference, A, A+, A-form, Heritage, Hybrid, Hybrid + Heritage; Lyon: the
+same six methods; list v3), with the keywords found in each cell. The last page compares them all; the CSV also has
+list v4. As in the paper (§5.2 c, Figure 2), a cell is counted in **sentences**: a
 sentence contains N × A when one of its action spans is linked to a natural span. Two margins complete the matrix:
 "no response" (environment only) and "no environment" (response not linked). `docs/pid_matrices.csv` has every cell
 with its keywords.
@@ -190,8 +234,9 @@ What the matrices show so far:
   sentences; the standard climate paragraph); a single response, *célèbre* (R) linked to *vergers* and *vignes* (N × R).
 - **Lyon, A-form v3**: B 43 %, C 20 %, N 10 % of the sentences, which fits the working hypothesis (built and
   cultural first). Responses appear in 11 % of the sentences (6 % with list v4), but in the review sample only 5 of
-  21 response spans were valid. With list v4, the sentences with a PID cell drop from 125 to 74. The algorithms' PID cells are an
-  upper bound until the human coding of Lyon is available.
+  21 response spans were valid. With list v4, the sentences with a PID cell drop from 125 to 74; with Hybrid,
+  to 38. The PID cells of A, A+ and A-form are an upper bound; those of Hybrid are the closest to the rules, but
+  remain unmeasured until the human coding of Lyon is available.
 
 The same script computes one matrix per article for a whole coded corpus:
 
@@ -201,18 +246,19 @@ The same script computes one matrix per article for a whole coded corpus:
 
 | Path | Content |
 |---|---|
-| `src/` | pipeline (steps 1–5), `keyword_coder.py` (A, A+, A-form), `pid_matrix.py`, comparison reports |
+| `src/` | pipeline (steps 1–5), `keyword_coder.py` (A, A+, A-form), `heritage.py`, `hybrid.py`, `pid_matrix.py`, comparison reports |
 | `schema/` | `keyword_list_v3.yaml` (reference), `keyword_list_v4.yaml` (proposal), `lexicon_v0.yaml` and `annotation_schema_v1.json` (prototype) |
 | `data/README.md` | data contract (formats of the corpus and sentence tables) |
-| `data/reference/` | pilot articles (raw API answers), Courchaton human reference, Lyon review sample |
-| `docs/` | lists and rules (PDF and text), reports (`courchaton_comparison`, `list_versions_comparison`, `pid_matrices`), this summary, `keyword_lists.md` |
-| `tests/` | 131 unit tests: `python -m pytest -q tests` |
+| `data/reference/` | pilot articles (raw API answers: Courchaton, Lyon, Fontainebleau), Courchaton human reference, Lyon review sample |
+| `data/llm/` | cached LLM answers of the Hybrid method (request, model, prompt version, answer) |
+| `docs/` | lists and rules (PDF and text), reports (`courchaton_comparison`, `list_versions_comparison`, `methods_comparison`, `pid_matrices`, `algorithms`: each algorithm and its limits), `hybrid_audit_lyon.csv`, this summary, `keyword_lists.md` |
+| `tests/` | 149 unit tests (no network: the LLM is replaced by a fake judge): `python -m pytest -q tests` |
 
 Reports are regenerated with:
 
     python src/compare_coders.py          # Courchaton: humans, AI and algorithms
     python src/compare_list_versions.py   # lists v3 and v4 on Courchaton and Lyon
-    python src/pid_matrix.py              # PID matrices of the pilot articles
+    python src/compare_methods.py         # the six methods + PID matrices (Hybrid needs an API key, or --offline)
 
 ## 9. Next steps and open questions
 
@@ -220,8 +266,9 @@ Reports are regenerated with:
    algorithms read rev. 241194072 (the coders' PDF), or the coders' spans are mapped onto rev. 241583218.
 2. **Agreement between coders** (Krippendorff's α at token, span and PID-cell level, paper §5.2) once the three
    codings exist.
-3. **Responses (D4/D6).** The biggest source of error in the algorithms' PID cells. Options: LLM annotators, or a
-   second pass that checks who feels or acts.
+3. **Responses (D4/D6).** The biggest source of error in the algorithms' PID cells. Hybrid addresses it: rerun it
+   through the API, then measure it on a human judgment of the 184 response candidates of Lyon (valid or not,
+   linked to which environment).
 4. **LLM annotators**: models, versions, prompt (the manual and the list, as given to the coders), repeated runs,
    costs.
 5. **List v4**: validation by the coders and J. Villar (see `docs/keyword_lists.md`), then a test on a third article

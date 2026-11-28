@@ -32,8 +32,15 @@ Run from the project root, in this order:
     python src/wikipedia_text.py      # article text -> data/processed/corpus_500.parquet
     python src/split_sentences.py     # sentences    -> data/processed/sentences_500.parquet
     python src/keyword_coder.py --method a_form   # keyword spans -> data/processed/spans_a_form.csv
+    python src/hybrid.py                          # A-form + LLM check of the responses -> data/processed/spans_hybrid.csv
+    python src/heritage.py --spans data/processed/spans_hybrid.csv --sentences data/processed/sentences_500.parquet
+                                                  # + links inherited from the previous sentence
     python src/pid_matrix.py --spans data/processed/spans_a_form.csv --sentences data/processed/sentences_500.parquet
                                                   # one PID matrix per article -> data/processed/pid_matrices_a_form.csv
+
+`hybrid.py` calls the Claude API (`claude-opus-5-5`): set `ANTHROPIC_API_KEY` in `.env` / the environment, or log
+in with `ant auth login`. Its answers are cached in `data/llm/hybrid_answers.jsonl` (versioned, so that a run can be
+audited and repeated); `--offline` uses the cache only.
 
 ## Keyword coding
 
@@ -56,6 +63,20 @@ Run from the project root, in this order:
   of each cell). Without arguments it writes `docs/pid_matrices.pdf` / `.csv`: one matrix per method and per
   pilot article (and the Courchaton human reference); with `--spans` and `--sentences`, one matrix per article
   of a coded corpus.
+- `src/heritage.py` (method **Heritage**): A-form, plus links inherited from the previous sentence when a
+  response has no environment in its sentence and the sentence refers back to a place (*y*, *là*, *celui-ci*,
+  sentence-initial *Il/Elle*…). Inherited links are flagged.
+- `src/hybrid.py` (method **Hybrid**): A-form environments kept; every response candidate (E, A, R) checked by an
+  LLM against rules D4 and D6, and linked by it to the environment words of its sentence (D7). The list stays
+  closed: the LLM never adds a word.
+- `src/compare_methods.py`: A, A+, A-form, Heritage, Hybrid and Hybrid + Heritage on Courchaton, Lyon and
+  Fontainebleau (`ARTICLES`) -> `docs/methods_comparison.pdf` / `.csv`, `docs/hybrid_audit_<article>.csv` (every
+  LLM decision with its reason), and
+  regenerates `docs/pid_matrices`. The current Hybrid figures are a **preview**: no API key was available, so the
+  answers in the cache were written by Claude inside a Claude Code session (model id
+  `session:claude-opus-5-5`); rerun `python src/compare_methods.py` with a key for the real run.
+- `src/algorithms_report.py` -> `docs/algorithms.pdf`: how each algorithm works and where it fails (figures read
+  from the comparison reports, so rerun it after `compare_methods.py`).
 - Earlier prototype, kept for reference: `schema/lexicon_v0.yaml`, `docs/coding_guide.md` and
   `src/classify_keywords.py` (sentence-level labels, schema v1).
 
